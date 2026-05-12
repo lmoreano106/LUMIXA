@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "971103409976",
+    "project_id": "lumixa-8dbcc",
+    "storage_bucket": "lumixa-8dbcc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:971103409976:android:b54bc7b0e0c14d9e4d53cd",
+        "android_client_info": {
+          "package_name": "com.lumixa.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkhDSS5ORAqv3tcfghQ0kgJNiujk53rNQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
