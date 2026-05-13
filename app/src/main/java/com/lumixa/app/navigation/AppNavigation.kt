@@ -6,11 +6,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.lumixa.app.presentation.auth.login.LoginScreen
 import com.lumixa.app.presentation.auth.register.RegisterScreen
-import com.lumixa.app.presentation.onboarding.OnboardingScreen
+import com.lumixa.app.presentation.expenses.AddExpenseScreen
+import com.lumixa.app.presentation.main.MainScreen
 import com.lumixa.app.presentation.onboarding.CurrencyScreen
 import com.lumixa.app.presentation.onboarding.IncomeScreen
-import com.lumixa.app.presentation.dashboard.DashboardScreen
-import com.lumixa.app.presentation.main.MainScreen
+import com.lumixa.app.presentation.onboarding.OnboardingScreen
+
 @Composable
 fun AppNavigation() {
 
@@ -58,7 +59,11 @@ fun AppNavigation() {
         }
 
         composable(Routes.Currency.route) {
-            CurrencyScreen(onContinueClick = { navController.navigate(Routes.Income.route) })
+            CurrencyScreen(
+                onContinueClick = {
+                    navController.navigate(Routes.Income.route)
+                }
+            )
         }
 
         composable(Routes.Income.route) {
@@ -70,7 +75,22 @@ fun AppNavigation() {
         }
 
         composable(Routes.Dashboard.route) {
-            MainScreen()
+            MainScreen(
+                onAddExpenseClick = {
+                    navController.navigate(Routes.AddExpense.route)
+                }
+            )
+        }
+
+        composable(Routes.AddExpense.route) {
+            AddExpenseScreen(
+                onSaveClick = {
+                    navController.popBackStack()
+                },
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
         }
 
         composable(Routes.Expenses.route) {

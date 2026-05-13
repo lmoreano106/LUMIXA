@@ -19,7 +19,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 
 @Composable
 fun DashboardScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onAddExpenseClick: () -> Unit = {}
 ) {
     LazyColumn(
         modifier = modifier
@@ -151,8 +152,7 @@ fun DashboardScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
-                onClick = {},
-                modifier = Modifier
+                onClick = onAddExpenseClick,                modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),

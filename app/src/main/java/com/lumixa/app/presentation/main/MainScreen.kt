@@ -10,7 +10,9 @@ import androidx.compose.ui.Modifier
 import com.lumixa.app.presentation.dashboard.DashboardScreen
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    onAddExpenseClick: () -> Unit
+) {
     var selectedTab by remember { mutableStateOf(0) }
 
     Scaffold(
@@ -42,7 +44,8 @@ fun MainScreen() {
 
         when (selectedTab) {
             0 -> DashboardScreen(
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier.padding(innerPadding),
+                onAddExpenseClick = onAddExpenseClick
             )
 
             1 -> Text(
