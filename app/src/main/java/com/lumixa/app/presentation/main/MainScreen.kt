@@ -8,7 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.lumixa.app.presentation.dashboard.DashboardScreen
-
+import com.lumixa.app.presentation.expenses.ExpensesScreen
 @Composable
 fun MainScreen(
     onAddExpenseClick: () -> Unit
@@ -48,10 +48,7 @@ fun MainScreen(
                 onAddExpenseClick = onAddExpenseClick
             )
 
-            1 -> Text(
-                text = "Módulo Gastos",
-                modifier = Modifier.padding(innerPadding)
-            )
+            1 -> ExpensesScreen()
 
             2 -> Text(
                 text = "Módulo Estadísticas",
