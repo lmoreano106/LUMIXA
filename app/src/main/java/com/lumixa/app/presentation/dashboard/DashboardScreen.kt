@@ -15,17 +15,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.lazy.LazyColumn
 
 @Composable
 fun DashboardScreen(
     modifier: Modifier = Modifier
 ) {
-    Column(
+    LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFF4F6F8))
-            .padding(24.dp)
+            .background(Color(0xFFF4F6F8)),
+        contentPadding = PaddingValues(
+            start = 24.dp,
+            end = 24.dp,
+            top = 24.dp,
+            bottom = 100.dp
+        )
     ) {
+        item {
         Text(
             text = "Hola, bienvenido",
             fontSize = 14.sp,
@@ -137,28 +144,33 @@ fun DashboardScreen(
                 )
             }
         }
+            Spacer(modifier = Modifier.height(20.dp))
 
-        Spacer(modifier = Modifier.weight(1f))
+            GoalCard()
 
-        Button(
-            onClick = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF2D6CDF)
-            )
-        ) {
-            Text(
-                text = "+ Agregar gasto",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-        }
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Button(
+                onClick = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF2D6CDF)
+                )
+            ) {
+                Text(
+                    text = "+ Agregar gasto",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
     }
 }
+}
+
 
 @Composable
 fun SummaryCard(
