@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.lumixa.app.presentation.onboarding.OnboardingScreen
 
 @Composable
 fun AppNavigation() {
@@ -12,11 +13,16 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Routes.Splash.route
+        startDestination = Routes.Onboarding.route
     ) {
 
-        composable(Routes.Splash.route) {
+        composable(Routes.Onboarding.route) {
 
+            OnboardingScreen(
+                onStartClick = {
+                    navController.navigate(Routes.Login.route)
+                }
+            )
         }
 
         composable(Routes.Login.route) {
