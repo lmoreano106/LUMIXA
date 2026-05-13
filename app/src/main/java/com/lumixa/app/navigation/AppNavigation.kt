@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.lumixa.app.presentation.auth.login.LoginScreen
+import com.lumixa.app.presentation.auth.register.RegisterScreen
 import com.lumixa.app.presentation.onboarding.OnboardingScreen
 
 @Composable
@@ -17,7 +19,6 @@ fun AppNavigation() {
     ) {
 
         composable(Routes.Onboarding.route) {
-
             OnboardingScreen(
                 onStartClick = {
                     navController.navigate(Routes.Login.route)
@@ -26,11 +27,31 @@ fun AppNavigation() {
         }
 
         composable(Routes.Login.route) {
-
+            LoginScreen(
+                onLoginClick = {
+                    navController.navigate(Routes.Dashboard.route)
+                },
+                onRegisterClick = {
+                    navController.navigate(Routes.Register.route)
+                },
+                onBackToHomeClick = {
+                    navController.navigate(Routes.Onboarding.route)
+                }
+            )
         }
 
         composable(Routes.Register.route) {
-
+            RegisterScreen(
+                onCreateAccountClick = {
+                    navController.navigate(Routes.Currency.route)
+                },
+                onBackToLoginClick = {
+                    navController.popBackStack()
+                },
+                onBackToHomeClick = {
+                    navController.navigate(Routes.Onboarding.route)
+                }
+            )
         }
 
         composable(Routes.Currency.route) {
