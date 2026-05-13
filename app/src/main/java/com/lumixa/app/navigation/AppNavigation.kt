@@ -10,6 +10,7 @@ import com.lumixa.app.presentation.onboarding.OnboardingScreen
 import com.lumixa.app.presentation.onboarding.CurrencyScreen
 import com.lumixa.app.presentation.onboarding.IncomeScreen
 import com.lumixa.app.presentation.dashboard.DashboardScreen
+import com.lumixa.app.presentation.main.MainScreen
 @Composable
 fun AppNavigation() {
 
@@ -69,7 +70,7 @@ fun AppNavigation() {
         }
 
         composable(Routes.Dashboard.route) {
-            DashboardScreen()
+            MainScreen()
         }
 
         composable(Routes.Expenses.route) {
