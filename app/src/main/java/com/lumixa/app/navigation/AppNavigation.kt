@@ -7,7 +7,9 @@ import androidx.navigation.compose.rememberNavController
 import com.lumixa.app.presentation.auth.login.LoginScreen
 import com.lumixa.app.presentation.auth.register.RegisterScreen
 import com.lumixa.app.presentation.onboarding.OnboardingScreen
-
+import com.lumixa.app.presentation.onboarding.CurrencyScreen
+import com.lumixa.app.presentation.onboarding.IncomeScreen
+import com.lumixa.app.presentation.dashboard.DashboardScreen
 @Composable
 fun AppNavigation() {
 
@@ -55,15 +57,19 @@ fun AppNavigation() {
         }
 
         composable(Routes.Currency.route) {
-
+            CurrencyScreen(onContinueClick = { navController.navigate(Routes.Income.route) })
         }
 
         composable(Routes.Income.route) {
-
+            IncomeScreen(
+                onContinueClick = {
+                    navController.navigate(Routes.Dashboard.route)
+                }
+            )
         }
 
         composable(Routes.Dashboard.route) {
-
+            DashboardScreen()
         }
 
         composable(Routes.Expenses.route) {
