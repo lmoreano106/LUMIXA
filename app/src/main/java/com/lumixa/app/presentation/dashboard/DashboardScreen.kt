@@ -20,7 +20,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 @Composable
 fun DashboardScreen(
     modifier: Modifier = Modifier,
-    onAddExpenseClick: () -> Unit = {}
+    onAddExpenseClick: () -> Unit = {},
+    onAddIncomeClick: () -> Unit = {}
 ) {
     LazyColumn(
         modifier = modifier
@@ -46,7 +47,44 @@ fun DashboardScreen(
             fontWeight = FontWeight.Bold,
             color = Color(0xFF0F2A44)
         )
+            Spacer(modifier = Modifier.height(18.dp))
 
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Button(
+                    onClick = onAddIncomeClick,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF1FBF9F)
+                    )
+                ) {
+                    Text(
+                        text = "+ Ingreso",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Button(
+                    onClick = onAddExpenseClick,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF2D6CDF)
+                    )
+                ) {
+                    Text(
+                        text = "+ Gasto",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         Spacer(modifier = Modifier.height(24.dp))
 
         Card(
@@ -149,24 +187,7 @@ fun DashboardScreen(
 
             GoalCard()
 
-            Spacer(modifier = Modifier.height(20.dp))
 
-            Button(
-                onClick = onAddExpenseClick,                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2D6CDF)
-                )
-            ) {
-                Text(
-                    text = "+ Agregar gasto",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
     }
 }
 }

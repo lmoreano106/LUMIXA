@@ -11,7 +11,7 @@ import com.lumixa.app.presentation.main.MainScreen
 import com.lumixa.app.presentation.onboarding.CurrencyScreen
 import com.lumixa.app.presentation.onboarding.IncomeScreen
 import com.lumixa.app.presentation.onboarding.OnboardingScreen
-
+import com.lumixa.app.presentation.dashboard.AddIncomeScreen
 @Composable
 fun AppNavigation() {
 
@@ -78,6 +78,10 @@ fun AppNavigation() {
             MainScreen(
                 onAddExpenseClick = {
                     navController.navigate(Routes.AddExpense.route)
+                },
+
+                onAddIncomeClick = {
+                    navController.navigate(Routes.AddIncome.route)
                 }
             )
         }
@@ -107,6 +111,17 @@ fun AppNavigation() {
 
         composable(Routes.Admin.route) {
 
+        }
+
+        composable(Routes.AddIncome.route) {
+            AddIncomeScreen(
+                onSaveClick = {
+                    navController.popBackStack()
+                },
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

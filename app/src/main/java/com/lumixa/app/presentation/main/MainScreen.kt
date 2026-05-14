@@ -11,7 +11,8 @@ import com.lumixa.app.presentation.dashboard.DashboardScreen
 import com.lumixa.app.presentation.expenses.ExpensesScreen
 @Composable
 fun MainScreen(
-    onAddExpenseClick: () -> Unit
+    onAddExpenseClick: () -> Unit,
+    onAddIncomeClick: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(0) }
 
@@ -45,7 +46,8 @@ fun MainScreen(
         when (selectedTab) {
             0 -> DashboardScreen(
                 modifier = Modifier.padding(innerPadding),
-                onAddExpenseClick = onAddExpenseClick
+                onAddExpenseClick = onAddExpenseClick,
+                onAddIncomeClick = onAddIncomeClick
             )
 
             1 -> ExpensesScreen()
