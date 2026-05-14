@@ -16,14 +16,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 
 @Composable
 fun DashboardScreen(
+    expenseViewModel: ExpenseViewModel,
     modifier: Modifier = Modifier,
     onAddExpenseClick: () -> Unit = {},
     onAddIncomeClick: () -> Unit = {},
     onGoalClick: () -> Unit = {}
 ){
+
+    val expenses by expenseViewModel.expenses.collectAsState()
+
+    val monthlyIncome = 1130000.0
+    val dailyBudget = monthlyIncome / 30
+    val spentToday = expenses.sumOf { it.amount }
+    val availableToday = dailyBudget - spentToday
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -129,10 +140,23 @@ fun DashboardScreen(
                 )
 
                 Text(
-                    text = "$37.667",
+                    text =
+                        if (availableToday >= 0) {
+                            "$${availableToday.toInt()}"
+                        } else {
+                            "Excedido $${kotlin.math.abs(availableToday.toInt())}"
+                        },
+
                     fontSize = 26.sp,
+
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1FBF9F)
+
+                    color =
+                        if (availableToday >= 0) {
+                            Color(0xFF1FBF9F)
+                        } else {
+                            Color(0xFFE11D48)
+                        }
                 )
             }
         }
@@ -152,7 +176,7 @@ fun DashboardScreen(
 
             SummaryCard(
                 title = "Gastos",
-                amount = "$0",
+                amount = "$${spentToday.toInt()}",
                 modifier = Modifier.weight(1f)
             )
         }
@@ -178,7 +202,11 @@ fun DashboardScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Estás en control. Aún no registras gastos hoy.",
+                    text = if (spentToday == 0.0) {
+                        "Estás en control. Aún no registras gastos hoy."
+                    } else {
+                        "Hoy has gastado $${spentToday.toInt()} de tu presupuesto diario."
+                    },
                     fontSize = 13.sp,
                     color = Color(0xFF6B7280)
                 )

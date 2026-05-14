@@ -13,11 +13,27 @@ import com.lumixa.app.presentation.onboarding.IncomeScreen
 import com.lumixa.app.presentation.onboarding.OnboardingScreen
 import com.lumixa.app.presentation.dashboard.AddIncomeScreen
 import com.lumixa.app.presentation.goals.CreateGoalScreen
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.lumixa.app.data.provider.DatabaseProvider
+import com.lumixa.app.data.repository.ExpenseRepository
+import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
+import com.lumixa.app.presentation.viewmodel.ExpenseViewModelFactory
 @Composable
 fun AppNavigation() {
 
     val navController = rememberNavController()
+    val context = LocalContext.current
 
+    val database = DatabaseProvider.getDatabase(context)
+
+    val expenseRepository = ExpenseRepository(
+        expenseDao = database.expenseDao()
+    )
+
+    val expenseViewModel: ExpenseViewModel = viewModel(
+        factory = ExpenseViewModelFactory(expenseRepository)
+    )
     NavHost(
         navController = navController,
         startDestination = Routes.Onboarding.route
@@ -77,6 +93,8 @@ fun AppNavigation() {
 
         composable(Routes.Dashboard.route) {
             MainScreen(
+                expenseViewModel = expenseViewModel,
+
                 onAddExpenseClick = {
                     navController.navigate(Routes.AddExpense.route)
                 },
@@ -93,9 +111,12 @@ fun AppNavigation() {
 
         composable(Routes.AddExpense.route) {
             AddExpenseScreen(
+                expenseViewModel = expenseViewModel,
+
                 onSaveClick = {
                     navController.popBackStack()
                 },
+
                 onBackClick = {
                     navController.popBackStack()
                 }

@@ -10,12 +10,14 @@ import androidx.compose.ui.Modifier
 import com.lumixa.app.presentation.dashboard.DashboardScreen
 import com.lumixa.app.presentation.expenses.ExpensesScreen
 import com.lumixa.app.presentation.statistics.StatisticsScreen
+import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 @Composable
 fun MainScreen(
+    expenseViewModel: ExpenseViewModel,
     onAddExpenseClick: () -> Unit,
     onAddIncomeClick: () -> Unit,
     onGoalClick: () -> Unit
-) {
+){
     var selectedTab by remember { mutableStateOf(0) }
 
     Scaffold(
@@ -47,16 +49,16 @@ fun MainScreen(
 
         when (selectedTab) {
             0 -> DashboardScreen(
+                expenseViewModel = expenseViewModel,
                 modifier = Modifier.padding(innerPadding),
-
                 onAddExpenseClick = onAddExpenseClick,
-
                 onAddIncomeClick = onAddIncomeClick,
-
                 onGoalClick = onGoalClick
             )
 
-            1 -> ExpensesScreen()
+            1 -> ExpensesScreen(
+                expenseViewModel = expenseViewModel
+            )
 
             2 -> StatisticsScreen()
         }

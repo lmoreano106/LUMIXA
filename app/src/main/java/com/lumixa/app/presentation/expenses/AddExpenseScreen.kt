@@ -19,9 +19,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 
 @Composable
 fun AddExpenseScreen(
+    expenseViewModel: ExpenseViewModel,
     onSaveClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
@@ -164,7 +166,31 @@ fun AddExpenseScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            onClick = onSaveClick,
+            onClick = {
+                val finalCategory =
+                    if (selectedCategory == "Otros" && customCategory.isNotBlank()) {
+                        customCategory
+                    } else {
+                        selectedCategory
+                    }
+
+                val finalDescription =
+                    if (note.isNotBlank()) {
+                        note
+                    } else {
+                        "Sin descripción"
+                    }
+
+                expenseViewModel.addExpense(
+                    category = finalCategory,
+                    description = finalDescription,
+                    amount = amount.toDoubleOrNull() ?: 0.0,
+                    date = "14 mayo 2026",
+                    time = "4:20 PM"
+                )
+
+                onSaveClick()
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -190,7 +216,6 @@ fun CategoryChip(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-
     val icon = when (text) {
         "Comida" -> "🍔"
         "Transporte" -> "🚗"
@@ -203,33 +228,21 @@ fun CategoryChip(
         modifier = modifier
             .height(58.dp)
             .clickable { onClick() },
-
         shape = RoundedCornerShape(14.dp),
-
         colors = CardDefaults.cardColors(
-            containerColor =
-                if (selected) {
-                    Color(0xFF2D6CDF)
-                } else {
-                    Color.White
-                }
+            containerColor = if (selected) Color(0xFF2D6CDF) else Color.White
         ),
-
         elevation = CardDefaults.cardElevation(
-            defaultElevation =
-                if (selected) 3.dp else 1.dp
+            defaultElevation = if (selected) 3.dp else 1.dp
         )
     ) {
-
         Row(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 14.dp),
-
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-
             Text(
                 text = icon,
                 fontSize = 18.sp
@@ -239,14 +252,7 @@ fun CategoryChip(
 
             Text(
                 text = text,
-
-                color =
-                    if (selected) {
-                        Color.White
-                    } else {
-                        Color(0xFF0F2A44)
-                    },
-
+                color = if (selected) Color.White else Color(0xFF0F2A44),
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold
             )

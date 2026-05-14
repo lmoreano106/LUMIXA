@@ -12,20 +12,30 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lumixa.app.data.local.entity.ExpenseEntity
+import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 
 @Composable
-fun ExpensesScreen() {
+fun ExpensesScreen(
+    expenseViewModel: ExpenseViewModel
+) {
+
+    val expenses by expenseViewModel.expenses.collectAsState()
 
     var selectedTab by remember { mutableStateOf(0) }
 
-    var showDetail by remember {
-        mutableStateOf(false)
+    var selectedExpense by remember {
+        mutableStateOf<ExpenseEntity?>(null)
     }
+
+    val totalExpenses =
+        expenses.sumOf { it.amount }
 
     Column(
         modifier = Modifier
@@ -69,47 +79,57 @@ fun ExpensesScreen() {
         when (selectedTab) {
 
             0 -> {
-                ExpensesList(
-                    title = "Gastos de hoy",
-                    total = "$45.000",
+                RealExpensesList(
+                    title = "Todos los gastos",
+                    total = "$${totalExpenses.toInt()}",
+                    expenses = expenses,
                     onExpenseClick = {
-                        showDetail = true
+                        selectedExpense = it
                     }
                 )
             }
 
             1 -> {
-                WeeklyExpenses(
+                RealExpensesList(
+                    title = "Últimos gastos",
+                    total = "$${totalExpenses.toInt()}",
+                    expenses = expenses,
                     onExpenseClick = {
-                        showDetail = true
+                        selectedExpense = it
                     }
                 )
             }
 
             2 -> {
-                DateExpenses(
+                RealExpensesList(
+                    title = "Gastos registrados",
+                    total = "$${totalExpenses.toInt()}",
+                    expenses = expenses,
                     onExpenseClick = {
-                        showDetail = true
+                        selectedExpense = it
                     }
                 )
             }
         }
 
-        if (showDetail) {
+        selectedExpense?.let { expense ->
 
             ExpenseDetailDialog(
-                amount = "$15.000",
-                category = "Comida",
-                description = "Almuerzo universidad",
-                date = "12 mayo 2026",
-                time = "12:40 PM",
+                amount = "$${expense.amount.toInt()}",
+                category = expense.category,
+                description = expense.description,
+                date = expense.date,
+                time = expense.time,
 
                 onDismiss = {
-                    showDetail = false
+                    selectedExpense = null
                 },
 
                 onDeleteClick = {
-                    showDetail = false
+
+                    expenseViewModel.deleteExpense(expense.id)
+
+                    selectedExpense = null
                 }
             )
         }
@@ -117,10 +137,11 @@ fun ExpensesScreen() {
 }
 
 @Composable
-fun ExpensesList(
+fun RealExpensesList(
     title: String,
     total: String,
-    onExpenseClick: () -> Unit
+    expenses: List<ExpenseEntity>,
+    onExpenseClick: (ExpenseEntity) -> Unit
 ) {
 
     LazyColumn {
@@ -135,204 +156,47 @@ fun ExpensesList(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        items(3) {
+        if (expenses.isEmpty()) {
+
+            item {
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    )
+                ) {
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(30.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        Text(
+                            text = "No tienes gastos registrados",
+                            color = Color(0xFF6B7280),
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            }
+        }
+
+        items(expenses.reversed()) { expense ->
 
             ExpenseItem(
-                category = "Comida",
-                description = "Almuerzo universidad",
-                amount = "$15.000",
-                time = "12:40 PM",
-                onClick = onExpenseClick
-            )
-        }
-    }
-}
-@Composable
-fun WeeklyExpenses(
-    onExpenseClick: () -> Unit
-) {
-
-    LazyColumn {
-
-        item {
-
-            SummaryExpenseCard(
-                title = "Últimos 7 días",
-                total = "$182.000"
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-        }
-
-        item {
-
-            DaySection(
-                day = "Hoy",
-                total = "$45.000",
-                onExpenseClick = onExpenseClick
-            )
-        }
-
-        item {
-
-            DaySection(
-                day = "Ayer",
-                total = "$27.000",
-                onExpenseClick = onExpenseClick
-            )
-        }
-
-        item {
-
-            DaySection(
-                day = "10 mayo",
-                total = "$68.000",
-                onExpenseClick = onExpenseClick
-            )
-        }
-    }
-}
-@Composable
-
-fun DateExpenses(
-    onExpenseClick: () -> Unit
-) {
-    var selectedDate by remember { mutableStateOf("12 mayo") }
-
-    LazyColumn {
-        item {
-            Text(
-                text = "Selecciona una fecha",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF6B7280)
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                DateChip(
-                    text = "12 mayo",
-                    selected = selectedDate == "12 mayo",
-                    modifier = Modifier.weight(1f),
-                    onClick = { selectedDate = "12 mayo" }
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                DateChip(
-                    text = "11 mayo",
-                    selected = selectedDate == "11 mayo",
-                    modifier = Modifier.weight(1f),
-                    onClick = { selectedDate = "11 mayo" }
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                DateChip(
-                    text = "10 mayo",
-                    selected = selectedDate == "10 mayo",
-                    modifier = Modifier.weight(1f),
-                    onClick = { selectedDate = "10 mayo" }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            SummaryExpenseCard(
-                title = "Gastos del $selectedDate",
-                total = when (selectedDate) {
-                    "12 mayo" -> "$23.000"
-                    "11 mayo" -> "$37.000"
-                    else -> "$68.000"
+                category = expense.category,
+                description = expense.description,
+                amount = "$${expense.amount.toInt()}",
+                time = expense.time,
+                onClick = {
+                    onExpenseClick(expense)
                 }
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
-
-        items(3) {
-            ExpenseItem(
-                category = "Comida",
-                description = "Gasto registrado el $selectedDate",
-                amount = "$15.000",
-                time = "12:40 PM",
-                onClick = onExpenseClick
-            )
-        }
-    }
-}
-
-@Composable
-fun DateChip(
-    text: String,
-    selected: Boolean,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = modifier
-            .height(42.dp)
-            .clickable { onClick() },
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (selected) Color(0xFF2D6CDF) else Color.White
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (selected) 3.dp else 1.dp
-        )
-    ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = androidx.compose.ui.Alignment.Center
-        ) {
-            Text(
-                text = text,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (selected) Color.White else Color(0xFF0F2A44)
-            )
-        }
-    }
-}
-
-@Composable
-fun DaySection(
-    day: String,
-    total: String,
-    onExpenseClick: () -> Unit
-) {
-
-    Column {
-
-        Text(
-            text = "$day • $total",
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF0F2A44)
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        ExpenseItem(
-            category = "Comida",
-            description = "Almuerzo",
-            amount = "$15.000",
-            time = "12:40 PM",
-            onClick = onExpenseClick
-        )
-
-        ExpenseItem(
-            category = "Transporte",
-            description = "Bus",
-            amount = "$7.000",
-            time = "08:10 AM",
-            onClick = onExpenseClick
-        )
-
-        Spacer(modifier = Modifier.height(14.dp))
     }
 }
 
