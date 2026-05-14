@@ -1,0 +1,504 @@
+package com.lumixa.app.presentation.statistics
+
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+@Composable
+fun StatisticsScreen() {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF4F6F8)),
+        contentPadding = PaddingValues(20.dp)
+    ) {
+        item {
+            Text(
+                text = "Estadísticas",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF0F2A44)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            GoalProgressStatsCard()
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            ExpenseChartCard()
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            CategoryDistributionCard()
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            SmartAnalysisCard()
+
+            Spacer(modifier = Modifier.height(90.dp))
+        }
+    }
+}
+
+@Composable
+fun GoalProgressStatsCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+    ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+            Text(
+                text = "META: LAPTOP PARA ESTUDIOS",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF6B7280)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CircularGoalProgress(progress = 0.38f)
+
+                Spacer(modifier = Modifier.width(20.dp))
+
+                Column {
+                    Text("Ahorrado", fontSize = 12.sp, color = Color(0xFF6B7280))
+
+                    Text(
+                        text = "$72.200",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1FBF9F)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text("Meta", fontSize = 12.sp, color = Color(0xFF6B7280))
+
+                    Text(
+                        text = "$190.000",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF0F2A44)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LinearProgressIndicator(
+                progress = { 0.38f },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp),
+                color = Color(0xFF1FBF9F),
+                trackColor = Color(0xFFE5E7EB)
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Avance actual", fontSize = 12.sp, color = Color(0xFF6B7280))
+
+                Text(
+                    text = "38%",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1FBF9F)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CircularGoalProgress(progress: Float) {
+    Box(
+        modifier = Modifier.size(96.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(modifier = Modifier.size(96.dp)) {
+            drawArc(
+                color = Color(0xFFE5E7EB),
+                startAngle = -90f,
+                sweepAngle = 360f,
+                useCenter = false,
+                style = Stroke(width = 10.dp.toPx(), cap = StrokeCap.Round)
+            )
+
+            drawArc(
+                color = Color(0xFF1FBF9F),
+                startAngle = -90f,
+                sweepAngle = 360f * progress,
+                useCenter = false,
+                style = Stroke(width = 10.dp.toPx(), cap = StrokeCap.Round)
+            )
+        }
+
+        Text(
+            text = "${(progress * 100).toInt()}%",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF0F2A44)
+        )
+    }
+}
+
+@Composable
+fun ExpenseChartCard() {
+    var chartMode by remember { mutableStateOf("Semana") }
+    var periodIndex by remember { mutableStateOf(0) }
+
+    val weeklyPeriods = listOf(
+        "3 - 9 mayo",
+        "10 - 16 mayo",
+        "17 - 23 mayo"
+    )
+
+    val monthlyPeriods = listOf(
+        "Abril 2026",
+        "Mayo 2026",
+        "Junio 2026"
+    )
+
+    val weeklyValues = listOf(
+        listOf(22, 35, 18, 42, 28, 55, 30),
+        listOf(35, 18, 42, 28, 55, 22, 40),
+        listOf(15, 25, 33, 20, 48, 38, 29)
+    )
+
+    val monthlyValues = listOf(
+        listOf(60, 80, 55, 90),
+        listOf(75, 60, 88, 70),
+        listOf(50, 85, 78, 95)
+    )
+
+    val currentPeriod = if (chartMode == "Semana") {
+        weeklyPeriods[periodIndex]
+    } else {
+        monthlyPeriods[periodIndex]
+    }
+
+    val values = if (chartMode == "Semana") {
+        weeklyValues[periodIndex]
+    } else {
+        monthlyValues[periodIndex]
+    }
+
+    val labels = if (chartMode == "Semana") {
+        listOf("D", "L", "M", "M", "J", "V", "S")
+    } else {
+        listOf("S1", "S2", "S3", "S4")
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+    ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (chartMode == "Semana") "GASTO SEMANAL" else "GASTO MENSUAL",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF6B7280)
+                )
+
+                Row {
+                    ModeChip(
+                        text = "Semana",
+                        selected = chartMode == "Semana",
+                        onClick = {
+                            chartMode = "Semana"
+                            periodIndex = 1
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    ModeChip(
+                        text = "Mes",
+                        selected = chartMode == "Mes",
+                        onClick = {
+                            chartMode = "Mes"
+                            periodIndex = 1
+                        }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                PeriodButton(
+                    text = "‹",
+                    onClick = {
+                        if (periodIndex > 0) periodIndex--
+                    }
+                )
+
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = currentPeriod,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF0F2A44)
+                    )
+
+                    Text(
+                        text = if (chartMode == "Semana") "Esta semana" else "Vista mensual",
+                        fontSize = 11.sp,
+                        color = Color(0xFF6B7280)
+                    )
+                }
+
+                PeriodButton(
+                    text = "›",
+                    onClick = {
+                        if (periodIndex < 2) periodIndex++
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(22.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                values.forEachIndexed { index, value ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .width(if (chartMode == "Semana") 18.dp else 32.dp)
+                                .height((value * 0.75).dp)
+                                .background(
+                                    color = Color(0xFF2D6CDF),
+                                    shape = RoundedCornerShape(10.dp)
+                                )
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = labels[index],
+                            fontSize = 11.sp,
+                            color = Color(0xFF6B7280)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ModeChip(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .height(32.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(99.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (selected) Color(0xFF2D6CDF) else Color(0xFFEAF1FF)
+        )
+    ) {
+        Box(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = text,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (selected) Color.White else Color(0xFF2D6CDF)
+            )
+        }
+    }
+}
+
+@Composable
+fun PeriodButton(
+    text: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .size(34.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(99.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF1FF))
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = text,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF2D6CDF)
+            )
+        }
+    }
+}
+
+@Composable
+fun CategoryDistributionCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+    ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+            Text(
+                text = "DISTRIBUCIÓN POR CATEGORÍA",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF6B7280)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            CategoryDistributionRow("🍔 Comida", "$120.000", 0.83f)
+            CategoryDistributionRow("🚗 Transporte", "$45.000", 0.31f)
+            CategoryDistributionRow("🎮 Ocio", "$25.000", 0.17f)
+            CategoryDistributionRow("✨ Otros", "$0", 0.0f)
+        }
+    }
+}
+
+@Composable
+fun CategoryDistributionRow(
+    category: String,
+    amount: String,
+    progress: Float
+) {
+    Column(modifier = Modifier.padding(bottom = 14.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = category,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF0F2A44)
+            )
+
+            Text(
+                text = "${(progress * 100).toInt()}% · $amount",
+                fontSize = 12.sp,
+                color = Color(0xFF6B7280)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        LinearProgressIndicator(
+            progress = { progress },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(7.dp),
+            color = Color(0xFF2D6CDF),
+            trackColor = Color(0xFFE5E7EB)
+        )
+    }
+}
+
+@Composable
+fun SmartAnalysisCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF1FF)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+            Text(
+                text = "ANÁLISIS INTELIGENTE",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF6B7280)
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            AnalysisMessage(
+                text = "Gastas más en comida. Representa el 83% de tus gastos actuales."
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            AnalysisMessage(
+                text = "Esta semana llevas $204.370 ahorrados. Puedes superar la semana pasada."
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            AnalysisMessage(
+                text = "Vas por buen camino para alcanzar tu meta si mantienes tu ahorro diario."
+            )
+        }
+    }
+}
+
+@Composable
+fun AnalysisMessage(text: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(14.dp),
+            fontSize = 13.sp,
+            lineHeight = 18.sp,
+            color = Color(0xFF0F2A44)
+        )
+    }
+}

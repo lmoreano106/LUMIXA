@@ -12,6 +12,7 @@ import com.lumixa.app.presentation.onboarding.CurrencyScreen
 import com.lumixa.app.presentation.onboarding.IncomeScreen
 import com.lumixa.app.presentation.onboarding.OnboardingScreen
 import com.lumixa.app.presentation.dashboard.AddIncomeScreen
+import com.lumixa.app.presentation.goals.CreateGoalScreen
 @Composable
 fun AppNavigation() {
 
@@ -82,6 +83,10 @@ fun AppNavigation() {
 
                 onAddIncomeClick = {
                     navController.navigate(Routes.AddIncome.route)
+                },
+
+                onGoalClick = {
+                    navController.navigate(Routes.CreateGoal.route)
                 }
             )
         }
@@ -96,7 +101,16 @@ fun AppNavigation() {
                 }
             )
         }
-
+        composable(Routes.CreateGoal.route) {
+            CreateGoalScreen(
+                onSaveClick = {
+                    navController.popBackStack()
+                },
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
         composable(Routes.Expenses.route) {
 
         }

@@ -21,8 +21,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 fun DashboardScreen(
     modifier: Modifier = Modifier,
     onAddExpenseClick: () -> Unit = {},
-    onAddIncomeClick: () -> Unit = {}
-) {
+    onAddIncomeClick: () -> Unit = {},
+    onGoalClick: () -> Unit = {}
+){
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -185,7 +186,9 @@ fun DashboardScreen(
         }
             Spacer(modifier = Modifier.height(20.dp))
 
-            GoalCard()
+            GoalCard(
+                onClick = onGoalClick
+            )
 
 
     }

@@ -1,6 +1,6 @@
 package com.lumixa.app.presentation.dashboard
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -15,28 +15,39 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun GoalCard() {
+fun GoalCard(
+    onClick: () -> Unit = {}
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onClick()
+            },
+
         shape = RoundedCornerShape(20.dp),
+
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
+
         elevation = CardDefaults.cardElevation(
             defaultElevation = 3.dp
         )
     ) {
+
         Column(
             modifier = Modifier.padding(18.dp)
         ) {
+
             Text(
                 text = "Meta inteligente",
-                fontSize = 17.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF0F2A44)
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = "Laptop para estudios",
@@ -44,18 +55,17 @@ fun GoalCard() {
                 color = Color(0xFF6B7280)
             )
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             LinearProgressIndicator(
                 progress = { 0.38f },
+
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(8.dp)
-                    .background(
-                        color = Color(0xFFE5E7EB),
-                        shape = RoundedCornerShape(99.dp)
-                    ),
+                    .height(8.dp),
+
                 color = Color(0xFF1FBF9F),
+
                 trackColor = Color(0xFFE5E7EB)
             )
 
@@ -65,27 +75,28 @@ fun GoalCard() {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+
                 Text(
                     text = "$72.200 ahorrado",
                     fontSize = 12.sp,
-                    color = Color(0xFF0F2A44),
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F2A44)
                 )
 
                 Text(
                     text = "38%",
                     fontSize = 12.sp,
-                    color = Color(0xFF1FBF9F),
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1FBF9F)
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Text(
                 text = "Necesitas ahorrar $6.334 por día para alcanzar tu meta.",
                 fontSize = 12.sp,
-                lineHeight = 17.sp,
+                lineHeight = 18.sp,
                 color = Color(0xFF6B7280)
             )
         }
