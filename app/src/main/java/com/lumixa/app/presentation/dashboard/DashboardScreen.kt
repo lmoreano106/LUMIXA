@@ -23,8 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
-import kotlin.math.abs
 import com.lumixa.app.presentation.viewmodel.IncomeViewModel
+import kotlin.math.abs
 
 @Composable
 fun DashboardScreen(
@@ -33,10 +33,12 @@ fun DashboardScreen(
     modifier: Modifier = Modifier,
     onAddExpenseClick: () -> Unit = {},
     onAddIncomeClick: () -> Unit = {},
-    onGoalClick: () -> Unit = {}
+    onGoalClick: () -> Unit = {},
+    onLogoutClick: () -> Unit = {}
 ) {
     val expenses by expenseViewModel.expenses.collectAsState()
     val incomes by incomeViewModel.incomes.collectAsState()
+
     val monthlyIncome: Double = incomes.sumOf { it.amount }
     val dailyBudget = monthlyIncome / 30
     val spentToday = expenses.sumOf { it.amount }
@@ -76,6 +78,9 @@ fun DashboardScreen(
                 }
 
                 Card(
+                    modifier = Modifier.clickable {
+                        onLogoutClick()
+                    },
                     shape = RoundedCornerShape(14.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = Color.White

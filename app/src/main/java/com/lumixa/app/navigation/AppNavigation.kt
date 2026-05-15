@@ -1,27 +1,28 @@
 package com.lumixa.app.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.lumixa.app.data.provider.DatabaseProvider
+import com.lumixa.app.data.repository.ExpenseRepository
+import com.lumixa.app.data.repository.IncomeRepository
 import com.lumixa.app.presentation.auth.login.LoginScreen
 import com.lumixa.app.presentation.auth.register.RegisterScreen
+import com.lumixa.app.presentation.dashboard.AddIncomeScreen
 import com.lumixa.app.presentation.expenses.AddExpenseScreen
+import com.lumixa.app.presentation.goals.CreateGoalScreen
 import com.lumixa.app.presentation.main.MainScreen
 import com.lumixa.app.presentation.onboarding.CurrencyScreen
 import com.lumixa.app.presentation.onboarding.IncomeScreen
 import com.lumixa.app.presentation.onboarding.OnboardingScreen
-import com.lumixa.app.presentation.dashboard.AddIncomeScreen
-import com.lumixa.app.presentation.goals.CreateGoalScreen
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.lumixa.app.data.provider.DatabaseProvider
-import com.lumixa.app.data.repository.ExpenseRepository
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModelFactory
-import com.lumixa.app.data.repository.IncomeRepository
 import com.lumixa.app.presentation.viewmodel.IncomeViewModel
 import com.lumixa.app.presentation.viewmodel.IncomeViewModelFactory
+
 @Composable
 fun AppNavigation() {
 
@@ -45,6 +46,7 @@ fun AppNavigation() {
     val incomeViewModel: IncomeViewModel = viewModel(
         factory = IncomeViewModelFactory(incomeRepository)
     )
+
     NavHost(
         navController = navController,
         startDestination = Routes.Onboarding.route
@@ -61,7 +63,12 @@ fun AppNavigation() {
         composable(Routes.Login.route) {
             LoginScreen(
                 onLoginClick = {
-                    navController.navigate(Routes.Dashboard.route)
+                    navController.navigate(Routes.Dashboard.route) {
+                        popUpTo(Routes.Onboarding.route) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
                 },
                 onRegisterClick = {
                     navController.navigate(Routes.Register.route)
@@ -97,7 +104,12 @@ fun AppNavigation() {
         composable(Routes.Income.route) {
             IncomeScreen(
                 onContinueClick = {
-                    navController.navigate(Routes.Dashboard.route)
+                    navController.navigate(Routes.Dashboard.route) {
+                        popUpTo(Routes.Onboarding.route) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
                 }
             )
         }
@@ -117,6 +129,15 @@ fun AppNavigation() {
 
                 onGoalClick = {
                     navController.navigate(Routes.CreateGoal.route)
+                },
+
+                onLogoutClick = {
+                    navController.navigate(Routes.Login.route) {
+                        popUpTo(Routes.Onboarding.route) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
                 }
             )
         }
@@ -124,18 +145,6 @@ fun AppNavigation() {
         composable(Routes.AddExpense.route) {
             AddExpenseScreen(
                 expenseViewModel = expenseViewModel,
-
-                onSaveClick = {
-                    navController.popBackStack()
-                },
-
-                onBackClick = {
-                    navController.popBackStack()
-                }
-            )
-        }
-        composable(Routes.CreateGoal.route) {
-            CreateGoalScreen(
                 onSaveClick = {
                     navController.popBackStack()
                 },
@@ -143,21 +152,6 @@ fun AppNavigation() {
                     navController.popBackStack()
                 }
             )
-        }
-        composable(Routes.Expenses.route) {
-
-        }
-
-        composable(Routes.Statistics.route) {
-
-        }
-
-        composable(Routes.Goal.route) {
-
-        }
-
-        composable(Routes.Admin.route) {
-
         }
 
         composable(Routes.AddIncome.route) {
@@ -171,5 +165,21 @@ fun AppNavigation() {
                 }
             )
         }
+
+        composable(Routes.CreateGoal.route) {
+            CreateGoalScreen(
+                onSaveClick = {
+                    navController.popBackStack()
+                },
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Routes.Expenses.route) {}
+        composable(Routes.Statistics.route) {}
+        composable(Routes.Goal.route) {}
+        composable(Routes.Admin.route) {}
     }
 }
