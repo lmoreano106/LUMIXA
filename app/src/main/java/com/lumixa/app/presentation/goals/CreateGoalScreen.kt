@@ -9,8 +9,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,7 +24,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lumixa.app.presentation.viewmodel.GoalViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateGoalScreen(
     goalViewModel: GoalViewModel,
@@ -29,6 +38,47 @@ fun CreateGoalScreen(
     var goalName by remember { mutableStateOf("") }
     var targetAmount by remember { mutableStateOf("") }
     var targetDate by remember { mutableStateOf("") }
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    val datePickerState = rememberDatePickerState()
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = {
+                showDatePicker = false
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val formatter = SimpleDateFormat(
+                                "dd/MM/yyyy",
+                                Locale.getDefault()
+                            )
+                            targetDate = formatter.format(Date(millis))
+                        }
+
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("Aceptar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        ) {
+            DatePicker(
+                state = datePickerState
+            )
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -40,7 +90,9 @@ fun CreateGoalScreen(
             text = "← Volver",
             fontSize = 13.sp,
             color = Color(0xFF6B7280),
-            modifier = Modifier.clickable { onBackClick() }
+            modifier = Modifier.clickable {
+                onBackClick()
+            }
         )
 
         Spacer(modifier = Modifier.height(22.dp))
@@ -66,7 +118,9 @@ fun CreateGoalScreen(
         GoalTextField(
             label = "NOMBRE DE LA META",
             value = goalName,
-            onValueChange = { goalName = it },
+            onValueChange = {
+                goalName = it
+            },
             placeholder = "Ejemplo: Laptop para estudios"
         )
 
@@ -84,21 +138,57 @@ fun CreateGoalScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        GoalTextField(
-            label = "FECHA LÍMITE",
-            value = targetDate,
-            onValueChange = { targetDate = it },
-            placeholder = "Ejemplo: 30/06/2026"
+        Text(
+            text = "FECHA LÍMITE",
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF6B7280)
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    showDatePicker = true
+                },
+            shape = RoundedCornerShape(14.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White
+            ),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 1.dp
+            )
+        ) {
+            Text(
+                text = if (targetDate.isNotBlank()) {
+                    targetDate
+                } else {
+                    "Seleccionar fecha límite"
+                },
+                modifier = Modifier.padding(18.dp),
+                fontSize = 14.sp,
+                color = if (targetDate.isNotBlank()) {
+                    Color(0xFF0F2A44)
+                } else {
+                    Color(0xFF6B7280)
+                }
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF1FF))
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFFEAF1FF)
+            )
         ) {
-            Column(modifier = Modifier.padding(18.dp)) {
+            Column(
+                modifier = Modifier.padding(18.dp)
+            ) {
                 Text(
                     text = "Recomendación inteligente",
                     fontSize = 16.sp,
@@ -134,7 +224,9 @@ fun CreateGoalScreen(
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D6CDF))
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF2D6CDF)
+            )
         ) {
             Text(
                 text = "Guardar meta",
@@ -167,9 +259,13 @@ fun GoalTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = Modifier.fillMaxWidth(),
-        placeholder = { Text(placeholder) },
+        placeholder = {
+            Text(placeholder)
+        },
         singleLine = true,
         shape = RoundedCornerShape(14.dp),
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType)
+        keyboardOptions = KeyboardOptions(
+            keyboardType = keyboardType
+        )
     )
 }
