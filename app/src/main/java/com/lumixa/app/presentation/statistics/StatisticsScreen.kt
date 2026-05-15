@@ -19,9 +19,16 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 
 @Composable
-fun StatisticsScreen() {
+
+fun StatisticsScreen(
+    expenseViewModel: ExpenseViewModel
+) {
+    val expenses by expenseViewModel.expenses.collectAsState()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -46,7 +53,9 @@ fun StatisticsScreen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            CategoryDistributionCard()
+            CategoryDistributionCard(
+                expenses = expenses
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -386,14 +395,24 @@ fun PeriodButton(
 }
 
 @Composable
-fun CategoryDistributionCard() {
+
+fun CategoryDistributionCard(
+    expenses: List<com.lumixa.app.data.local.entity.ExpenseEntity>
+) {
+
+    val total = expenses.sumOf { it.amount }
+
+    val grouped = expenses.groupBy { it.category }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
+
         Column(modifier = Modifier.padding(18.dp)) {
+
             Text(
                 text = "DISTRIBUCIÓN POR CATEGORÍA",
                 fontSize = 11.sp,
@@ -403,10 +422,23 @@ fun CategoryDistributionCard() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            CategoryDistributionRow("🍔 Comida", "$120.000", 0.83f)
-            CategoryDistributionRow("🚗 Transporte", "$45.000", 0.31f)
-            CategoryDistributionRow("🎮 Ocio", "$25.000", 0.17f)
-            CategoryDistributionRow("✨ Otros", "$0", 0.0f)
+            grouped.forEach { (category, items) ->
+
+                val categoryTotal = items.sumOf { it.amount }
+
+                val progress =
+                    if (total > 0) {
+                        (categoryTotal / total).toFloat()
+                    } else {
+                        0f
+                    }
+
+                CategoryDistributionRow(
+                    category = category,
+                    amount = "$${categoryTotal.toInt()}",
+                    progress = progress
+                )
+            }
         }
     }
 }

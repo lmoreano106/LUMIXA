@@ -63,7 +63,9 @@ fun MainScreen(
                 expenseViewModel = expenseViewModel
             )
 
-            2 -> StatisticsScreen()
+            2 -> StatisticsScreen(
+                expenseViewModel = expenseViewModel
+            )
         }
     }
 }
