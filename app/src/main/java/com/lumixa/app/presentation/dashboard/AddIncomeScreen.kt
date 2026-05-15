@@ -13,9 +13,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lumixa.app.presentation.viewmodel.IncomeViewModel
 
 @Composable
 fun AddIncomeScreen(
+    incomeViewModel: IncomeViewModel,
     onSaveClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
@@ -111,12 +113,27 @@ fun AddIncomeScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            onClick = onSaveClick,
+            onClick = {
+                incomeViewModel.addIncome(
+                    amount = amount.toDoubleOrNull() ?: 0.0,
+                    type = incomeType,
+                    description = if (description.isNotBlank()) description else "Sin descripción",
+                    date = "14 mayo 2026",
+                    time = "4:20 PM"
+                )
+
+                onSaveClick()
+            },
+
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
+
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D6CDF))
+
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF2D6CDF)
+            )
         ) {
             Text(
                 text = "Guardar ingreso",

@@ -11,9 +11,11 @@ import com.lumixa.app.presentation.dashboard.DashboardScreen
 import com.lumixa.app.presentation.expenses.ExpensesScreen
 import com.lumixa.app.presentation.statistics.StatisticsScreen
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
+import com.lumixa.app.presentation.viewmodel.IncomeViewModel
 @Composable
 fun MainScreen(
     expenseViewModel: ExpenseViewModel,
+    incomeViewModel: IncomeViewModel,
     onAddExpenseClick: () -> Unit,
     onAddIncomeClick: () -> Unit,
     onGoalClick: () -> Unit
@@ -50,6 +52,7 @@ fun MainScreen(
         when (selectedTab) {
             0 -> DashboardScreen(
                 expenseViewModel = expenseViewModel,
+                incomeViewModel = incomeViewModel,
                 modifier = Modifier.padding(innerPadding),
                 onAddExpenseClick = onAddExpenseClick,
                 onAddIncomeClick = onAddIncomeClick,

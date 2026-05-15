@@ -24,18 +24,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 import kotlin.math.abs
+import com.lumixa.app.presentation.viewmodel.IncomeViewModel
 
 @Composable
 fun DashboardScreen(
     expenseViewModel: ExpenseViewModel,
+    incomeViewModel: IncomeViewModel,
     modifier: Modifier = Modifier,
     onAddExpenseClick: () -> Unit = {},
     onAddIncomeClick: () -> Unit = {},
     onGoalClick: () -> Unit = {}
 ) {
     val expenses by expenseViewModel.expenses.collectAsState()
-
-    val monthlyIncome = 1130000.0
+    val incomes by incomeViewModel.incomes.collectAsState()
+    val monthlyIncome: Double = incomes.sumOf { it.amount }
     val dailyBudget = monthlyIncome / 30
     val spentToday = expenses.sumOf { it.amount }
     val availableToday = dailyBudget - spentToday
