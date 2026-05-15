@@ -13,6 +13,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -25,14 +26,19 @@ import androidx.compose.ui.unit.sp
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 import com.lumixa.app.presentation.viewmodel.GoalViewModel
 import com.lumixa.app.presentation.viewmodel.IncomeViewModel
-import kotlin.math.abs
+import com.lumixa.app.presentation.viewmodel.SavingsViewModel
 import com.lumixa.app.utils.FinancialCalculator
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import kotlin.math.abs
 
 @Composable
 fun DashboardScreen(
     expenseViewModel: ExpenseViewModel,
     incomeViewModel: IncomeViewModel,
     goalViewModel: GoalViewModel,
+    savingsViewModel: SavingsViewModel,
     modifier: Modifier = Modifier,
     onAddExpenseClick: () -> Unit = {},
     onAddIncomeClick: () -> Unit = {},
@@ -42,27 +48,30 @@ fun DashboardScreen(
     val expenses by expenseViewModel.expenses.collectAsState()
     val incomes by incomeViewModel.incomes.collectAsState()
     val goals by goalViewModel.goals.collectAsState()
+    val savings by savingsViewModel.savings.collectAsState()
 
-    val totalIncome =
-        incomes.sumOf { it.amount }
+    val todayDate =
+        SimpleDateFormat("dd MMMM yyyy", Locale("es", "ES")).format(Date())
 
-    val totalExpenses =
-        expenses.sumOf { it.amount }
+    val totalIncome = incomes.sumOf { it.amount }
+
+    val todayExpenses =
+        expenses
+            .filter { it.date == todayDate }
+            .sumOf { it.amount }
+
+    val totalExpenses = expenses.sumOf { it.amount }
+
+    val totalSavings = savings.sumOf { it.amount }
 
     val monthlyIncome =
-        FinancialCalculator.calculateMonthlyIncome(
-            totalIncome
-        )
+        FinancialCalculator.calculateMonthlyIncome(totalIncome)
 
     val dailyBudget =
-        FinancialCalculator.calculateDailyBudget(
-            monthlyIncome
-        )
+        FinancialCalculator.calculateDailyBudget(monthlyIncome)
 
     val spentToday =
-        FinancialCalculator.calculateSpent(
-            totalExpenses
-        )
+        FinancialCalculator.calculateSpent(todayExpenses)
 
     val availableToday =
         FinancialCalculator.calculateAvailableToday(
@@ -71,9 +80,19 @@ fun DashboardScreen(
         )
 
     val savingsToday =
-        FinancialCalculator.calculateSavings(
-            availableToday
+        FinancialCalculator.calculateSavings(availableToday)
+
+    LaunchedEffect(
+        todayDate,
+        savingsToday,
+        totalIncome,
+        spentToday
+    ) {
+        savingsViewModel.saveDailySaving(
+            amount = savingsToday,
+            date = todayDate
         )
+    }
 
     LazyColumn(
         modifier = modifier
@@ -131,7 +150,7 @@ fun DashboardScreen(
 
             BalanceCard(
                 monthlyIncome = monthlyIncome,
-                spentToday = spentToday,
+                totalExpenses = totalExpenses,
                 onAddIncomeClick = onAddIncomeClick
             )
 
@@ -149,7 +168,8 @@ fun DashboardScreen(
             SmartDailyMessage(
                 spentToday = spentToday,
                 availableToday = availableToday,
-                savingsToday = savingsToday
+                savingsToday = savingsToday,
+                totalSavings = totalSavings
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -194,7 +214,7 @@ fun DashboardScreen(
 
             GoalCard(
                 goals = goals,
-                savingsToday = savingsToday,
+                savingsToday = totalSavings,
                 onClick = onGoalClick
             )
         }
@@ -204,10 +224,10 @@ fun DashboardScreen(
 @Composable
 fun BalanceCard(
     monthlyIncome: Double,
-    spentToday: Double,
+    totalExpenses: Double,
     onAddIncomeClick: () -> Unit
 ) {
-    val currentBalance = monthlyIncome - spentToday
+    val currentBalance = monthlyIncome - totalExpenses
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -295,7 +315,7 @@ fun BalanceCard(
                 )
 
                 Text(
-                    text = "↓ Gastos: $${spentToday.toInt()}",
+                    text = "↓ Gastos: $${totalExpenses.toInt()}",
                     fontSize = 12.sp,
                     color = Color(0xFFE11D48),
                     fontWeight = FontWeight.Bold
@@ -424,7 +444,7 @@ fun DailyControlCard(
                 )
 
                 DailyMiniStat(
-                    title = "AHORRO",
+                    title = "AHORRO HOY",
                     amount = if (availableToday >= 0) {
                         "+$${savingsToday.toInt()}"
                     } else {
@@ -464,7 +484,8 @@ fun DailyMiniStat(
 fun SmartDailyMessage(
     spentToday: Double,
     availableToday: Double,
-    savingsToday: Double
+    savingsToday: Double,
+    totalSavings: Double
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -479,11 +500,11 @@ fun SmartDailyMessage(
     ) {
         Text(
             text = if (spentToday == 0.0) {
-                "👍 Empieza el día sin gastos. Tu ahorro se acumula."
+                "👍 Empieza el día sin gastos. Tu ahorro acumulado es $${totalSavings.toInt()}."
             } else if (availableToday >= 0) {
-                "💪 Buen trabajo. Hoy todavía puedes ahorrar $${savingsToday.toInt()}."
+                "💪 Buen trabajo. Hoy ahorrarías $${savingsToday.toInt()}. Ahorro acumulado: $${totalSavings.toInt()}."
             } else {
-                "⚠️ Te excediste hoy. Revisa tus gastos para recuperar el control."
+                "⚠️ Te excediste hoy. No se agregará ahorro automático a tu meta."
             },
             modifier = Modifier.padding(16.dp),
             fontSize = 13.sp,

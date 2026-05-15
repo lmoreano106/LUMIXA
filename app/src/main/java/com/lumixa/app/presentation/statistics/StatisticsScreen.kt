@@ -23,14 +23,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 import com.lumixa.app.presentation.viewmodel.GoalViewModel
+import com.lumixa.app.presentation.viewmodel.SavingsViewModel
 @Composable
 
 fun StatisticsScreen(
     expenseViewModel: ExpenseViewModel,
-    goalViewModel: GoalViewModel
-) {
+    goalViewModel: GoalViewModel,
+    savingsViewModel: SavingsViewModel
+){
     val expenses by expenseViewModel.expenses.collectAsState()
     val goals by goalViewModel.goals.collectAsState()
+    val savings by savingsViewModel.savings.collectAsState()
+    val totalSavings = savings.sumOf { it.amount }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -49,7 +53,7 @@ fun StatisticsScreen(
 
             GoalProgressStatsCard(
                 goals = goals,
-                totalExpenses = expenses.sumOf { it.amount }
+                totalSavings = totalSavings
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -78,13 +82,13 @@ fun StatisticsScreen(
 @Composable
 fun GoalProgressStatsCard(
     goals: List<com.lumixa.app.data.local.entity.GoalEntity>,
-    totalExpenses: Double
+    totalSavings: Double
 ) {
 
     val goal = goals.firstOrNull()
 
     val smartSavedAmount =
-        (totalExpenses * 0.25).coerceAtLeast(0.0)
+        totalSavings.coerceAtLeast(0.0)
 
     val progress =
         if (goal != null && goal.targetAmount > 0) {

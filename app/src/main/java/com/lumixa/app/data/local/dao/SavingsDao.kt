@@ -25,4 +25,12 @@ interface SavingsDao {
     suspend fun getSavingByDate(
         date: String
     ): SavingsEntity?
+
+    @Query("UPDATE savings SET amount = :amount WHERE date = :date")
+    suspend fun updateSavingByDate(
+        amount: Double,
+        date: String
+    )
+
+    
 }

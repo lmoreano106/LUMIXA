@@ -13,7 +13,7 @@ import com.lumixa.app.presentation.statistics.StatisticsScreen
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 import com.lumixa.app.presentation.viewmodel.GoalViewModel
 import com.lumixa.app.presentation.viewmodel.IncomeViewModel
-
+import com.lumixa.app.presentation.viewmodel.SavingsViewModel
 @Composable
 fun MainScreen(
     expenseViewModel: ExpenseViewModel,
@@ -22,8 +22,8 @@ fun MainScreen(
     onAddExpenseClick: () -> Unit,
     onAddIncomeClick: () -> Unit,
     onGoalClick: () -> Unit,
-    onLogoutClick: () -> Unit
-
+    onLogoutClick: () -> Unit,
+    savingsViewModel: SavingsViewModel
 ) {
 
     var selectedTab by remember {
@@ -89,7 +89,8 @@ fun MainScreen(
                 onAddExpenseClick = onAddExpenseClick,
                 onAddIncomeClick = onAddIncomeClick,
                 onGoalClick = onGoalClick,
-                onLogoutClick = onLogoutClick
+                onLogoutClick = onLogoutClick,
+                        savingsViewModel = savingsViewModel
             )
 
             1 -> ExpensesScreen(
@@ -98,7 +99,8 @@ fun MainScreen(
 
             2 -> StatisticsScreen(
                 expenseViewModel = expenseViewModel,
-                goalViewModel = goalViewModel
+                goalViewModel = goalViewModel,
+                savingsViewModel = savingsViewModel
             )
         }
     }

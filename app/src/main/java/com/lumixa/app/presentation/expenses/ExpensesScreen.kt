@@ -8,9 +8,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,22 +24,70 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lumixa.app.data.local.entity.ExpenseEntity
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpensesScreen(
     expenseViewModel: ExpenseViewModel
 ) {
-
     val expenses by expenseViewModel.expenses.collectAsState()
 
     var selectedTab by remember { mutableStateOf(0) }
+    var selectedExpense by remember { mutableStateOf<ExpenseEntity?>(null) }
 
-    var selectedExpense by remember {
-        mutableStateOf<ExpenseEntity?>(null)
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = androidx.compose.material3.rememberDatePickerState()
+
+    val formatter = remember {
+        SimpleDateFormat("dd MMMM yyyy", Locale("es", "ES"))
     }
 
-    val totalExpenses =
-        expenses.sumOf { it.amount }
+    val selectedDate = remember(datePickerState.selectedDateMillis) {
+        datePickerState.selectedDateMillis?.let { millis ->
+            formatter.format(Date(millis))
+        } ?: formatter.format(Date())
+    }
+
+    val totalExpenses = expenses.sumOf { it.amount }
+
+    val filteredByDate = expenses.filter {
+        it.date == selectedDate
+    }
+
+    val totalByDate = filteredByDate.sumOf { it.amount }
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = {
+                showDatePicker = false
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("Aceptar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        ) {
+            DatePicker(
+                state = datePickerState
+            )
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -43,7 +95,6 @@ fun ExpensesScreen(
             .background(Color(0xFFF4F6F8))
             .padding(20.dp)
     ) {
-
         Text(
             text = "Gastos",
             fontSize = 28.sp,
@@ -54,7 +105,6 @@ fun ExpensesScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         TabRow(selectedTabIndex = selectedTab) {
-
             Tab(
                 selected = selectedTab == 0,
                 onClick = { selectedTab = 0 },
@@ -77,7 +127,6 @@ fun ExpensesScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         when (selectedTab) {
-
             0 -> {
                 RealExpensesList(
                     title = "Todos los gastos",
@@ -101,10 +150,13 @@ fun ExpensesScreen(
             }
 
             2 -> {
-                RealExpensesList(
-                    title = "Gastos registrados",
-                    total = "$${totalExpenses.toInt()}",
-                    expenses = expenses,
+                DateExpensesList(
+                    selectedDate = selectedDate,
+                    total = "$${totalByDate.toInt()}",
+                    expenses = filteredByDate,
+                    onSelectDateClick = {
+                        showDatePicker = true
+                    },
                     onExpenseClick = {
                         selectedExpense = it
                     }
@@ -113,22 +165,17 @@ fun ExpensesScreen(
         }
 
         selectedExpense?.let { expense ->
-
             ExpenseDetailDialog(
                 amount = "$${expense.amount.toInt()}",
                 category = expense.category,
                 description = expense.description,
                 date = expense.date,
                 time = expense.time,
-
                 onDismiss = {
                     selectedExpense = null
                 },
-
                 onDeleteClick = {
-
                     expenseViewModel.deleteExpense(expense.id)
-
                     selectedExpense = null
                 }
             )
@@ -137,19 +184,63 @@ fun ExpensesScreen(
 }
 
 @Composable
-fun RealExpensesList(
-    title: String,
+fun DateExpensesList(
+    selectedDate: String,
     total: String,
     expenses: List<ExpenseEntity>,
+    onSelectDateClick: () -> Unit,
     onExpenseClick: (ExpenseEntity) -> Unit
 ) {
-
     LazyColumn {
-
         item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        onSelectDateClick()
+                    },
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 2.dp
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(18.dp)
+                ) {
+                    Text(
+                        text = "Fecha seleccionada",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF6B7280)
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = selectedDate,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF0F2A44)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "Toca aquí para cambiar la fecha",
+                        fontSize = 12.sp,
+                        color = Color(0xFF2D6CDF),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             SummaryExpenseCard(
-                title = title,
+                title = "Gastos del día",
                 total = total
             )
 
@@ -157,36 +248,14 @@ fun RealExpensesList(
         }
 
         if (expenses.isEmpty()) {
-
             item {
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.White
-                    )
-                ) {
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(30.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-
-                        Text(
-                            text = "No tienes gastos registrados",
-                            color = Color(0xFF6B7280),
-                            fontSize = 14.sp
-                        )
-                    }
-                }
+                EmptyExpensesCard(
+                    text = "No tienes gastos en esta fecha"
+                )
             }
         }
 
         items(expenses.reversed()) { expense ->
-
             ExpenseItem(
                 category = expense.category,
                 description = expense.description,
@@ -201,25 +270,85 @@ fun RealExpensesList(
 }
 
 @Composable
-fun SummaryExpenseCard(
+fun RealExpensesList(
     title: String,
-    total: String
+    total: String,
+    expenses: List<ExpenseEntity>,
+    onExpenseClick: (ExpenseEntity) -> Unit
 ) {
+    LazyColumn {
+        item {
+            SummaryExpenseCard(
+                title = title,
+                total = total
+            )
 
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (expenses.isEmpty()) {
+            item {
+                EmptyExpensesCard(
+                    text = "No tienes gastos registrados"
+                )
+            }
+        }
+
+        items(expenses.reversed()) { expense ->
+            ExpenseItem(
+                category = expense.category,
+                description = expense.description,
+                amount = "$${expense.amount.toInt()}",
+                time = expense.time,
+                onClick = {
+                    onExpenseClick(expense)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun EmptyExpensesCard(
+    text: String
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-
         shape = RoundedCornerShape(18.dp),
-
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         )
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(30.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = text,
+                color = Color(0xFF6B7280),
+                fontSize = 14.sp
+            )
+        }
+    }
+}
 
+@Composable
+fun SummaryExpenseCard(
+    title: String,
+    total: String
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        )
+    ) {
         Column(
             modifier = Modifier.padding(18.dp)
         ) {
-
             Text(
                 text = title,
                 fontWeight = FontWeight.Bold,
@@ -246,7 +375,6 @@ fun ExpenseItem(
     time: String,
     onClick: () -> Unit
 ) {
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -254,26 +382,19 @@ fun ExpenseItem(
             .clickable {
                 onClick()
             },
-
         shape = RoundedCornerShape(18.dp),
-
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
-
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp
         )
     ) {
-
         Row(
             modifier = Modifier.padding(16.dp),
-
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-
             Column {
-
                 Text(
                     text = category,
                     fontWeight = FontWeight.Bold,
