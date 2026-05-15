@@ -22,7 +22,9 @@ import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModelFactory
 import com.lumixa.app.presentation.viewmodel.IncomeViewModel
 import com.lumixa.app.presentation.viewmodel.IncomeViewModelFactory
-
+import com.lumixa.app.data.repository.GoalRepository
+import com.lumixa.app.presentation.viewmodel.GoalViewModel
+import com.lumixa.app.presentation.viewmodel.GoalViewModelFactory
 @Composable
 fun AppNavigation() {
 
@@ -46,7 +48,13 @@ fun AppNavigation() {
     val incomeViewModel: IncomeViewModel = viewModel(
         factory = IncomeViewModelFactory(incomeRepository)
     )
+    val goalRepository = GoalRepository(
+        goalDao = database.goalDao()
+    )
 
+    val goalViewModel: GoalViewModel = viewModel(
+        factory = GoalViewModelFactory(goalRepository)
+    )
     NavHost(
         navController = navController,
         startDestination = Routes.Onboarding.route
@@ -116,6 +124,7 @@ fun AppNavigation() {
 
         composable(Routes.Dashboard.route) {
             MainScreen(
+                goalViewModel = goalViewModel,
                 incomeViewModel = incomeViewModel,
                 expenseViewModel = expenseViewModel,
 
@@ -168,6 +177,7 @@ fun AppNavigation() {
 
         composable(Routes.CreateGoal.route) {
             CreateGoalScreen(
+                goalViewModel = goalViewModel,
                 onSaveClick = {
                     navController.popBackStack()
                 },

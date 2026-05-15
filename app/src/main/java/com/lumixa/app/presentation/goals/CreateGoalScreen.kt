@@ -18,9 +18,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lumixa.app.presentation.viewmodel.GoalViewModel
 
 @Composable
 fun CreateGoalScreen(
+    goalViewModel: GoalViewModel,
     onSaveClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
@@ -38,9 +40,7 @@ fun CreateGoalScreen(
             text = "← Volver",
             fontSize = 13.sp,
             color = Color(0xFF6B7280),
-            modifier = Modifier.clickable {
-                onBackClick()
-            }
+            modifier = Modifier.clickable { onBackClick() }
         )
 
         Spacer(modifier = Modifier.height(22.dp))
@@ -96,13 +96,9 @@ fun CreateGoalScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color(0xFFEAF1FF)
-            )
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF1FF))
         ) {
-            Column(
-                modifier = Modifier.padding(18.dp)
-            ) {
+            Column(modifier = Modifier.padding(18.dp)) {
                 Text(
                     text = "Recomendación inteligente",
                     fontSize = 16.sp,
@@ -113,7 +109,7 @@ fun CreateGoalScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Cuando conectemos los datos reales, aquí se calculará el ahorro diario recomendado según tu ingreso, gastos y fecha límite.",
+                    text = "Al guardar tu meta, LUMIXA la mostrará en el inicio y calculará tu progreso financiero.",
                     fontSize = 13.sp,
                     lineHeight = 19.sp,
                     color = Color(0xFF6B7280)
@@ -124,14 +120,21 @@ fun CreateGoalScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            onClick = onSaveClick,
+            onClick = {
+                goalViewModel.addGoal(
+                    name = if (goalName.isNotBlank()) goalName else "Meta sin nombre",
+                    targetAmount = targetAmount.toDoubleOrNull() ?: 0.0,
+                    savedAmount = 0.0,
+                    targetDate = if (targetDate.isNotBlank()) targetDate else "Sin fecha"
+                )
+
+                onSaveClick()
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF2D6CDF)
-            )
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D6CDF))
         ) {
             Text(
                 text = "Guardar meta",
@@ -164,13 +167,9 @@ fun GoalTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = Modifier.fillMaxWidth(),
-        placeholder = {
-            Text(placeholder)
-        },
+        placeholder = { Text(placeholder) },
         singleLine = true,
         shape = RoundedCornerShape(14.dp),
-        keyboardOptions = KeyboardOptions(
-            keyboardType = keyboardType
-        )
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType)
     )
 }

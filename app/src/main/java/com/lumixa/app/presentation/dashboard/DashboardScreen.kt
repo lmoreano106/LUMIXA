@@ -23,13 +23,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
+import com.lumixa.app.presentation.viewmodel.GoalViewModel
 import com.lumixa.app.presentation.viewmodel.IncomeViewModel
 import kotlin.math.abs
+import com.lumixa.app.utils.FinancialCalculator
 
 @Composable
 fun DashboardScreen(
     expenseViewModel: ExpenseViewModel,
     incomeViewModel: IncomeViewModel,
+    goalViewModel: GoalViewModel,
     modifier: Modifier = Modifier,
     onAddExpenseClick: () -> Unit = {},
     onAddIncomeClick: () -> Unit = {},
@@ -38,12 +41,39 @@ fun DashboardScreen(
 ) {
     val expenses by expenseViewModel.expenses.collectAsState()
     val incomes by incomeViewModel.incomes.collectAsState()
+    val goals by goalViewModel.goals.collectAsState()
 
-    val monthlyIncome: Double = incomes.sumOf { it.amount }
-    val dailyBudget = monthlyIncome / 30
-    val spentToday = expenses.sumOf { it.amount }
-    val availableToday = dailyBudget - spentToday
-    val savingsToday = availableToday.coerceAtLeast(0.0)
+    val totalIncome =
+        incomes.sumOf { it.amount }
+
+    val totalExpenses =
+        expenses.sumOf { it.amount }
+
+    val monthlyIncome =
+        FinancialCalculator.calculateMonthlyIncome(
+            totalIncome
+        )
+
+    val dailyBudget =
+        FinancialCalculator.calculateDailyBudget(
+            monthlyIncome
+        )
+
+    val spentToday =
+        FinancialCalculator.calculateSpent(
+            totalExpenses
+        )
+
+    val availableToday =
+        FinancialCalculator.calculateAvailableToday(
+            dailyBudget,
+            spentToday
+        )
+
+    val savingsToday =
+        FinancialCalculator.calculateSavings(
+            availableToday
+        )
 
     LazyColumn(
         modifier = modifier
@@ -163,6 +193,8 @@ fun DashboardScreen(
             Spacer(modifier = Modifier.height(18.dp))
 
             GoalCard(
+                goals = goals,
+                savingsToday = savingsToday,
                 onClick = onGoalClick
             )
         }

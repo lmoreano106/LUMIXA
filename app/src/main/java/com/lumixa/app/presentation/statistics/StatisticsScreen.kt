@@ -22,13 +22,15 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
-
+import com.lumixa.app.presentation.viewmodel.GoalViewModel
 @Composable
 
 fun StatisticsScreen(
-    expenseViewModel: ExpenseViewModel
+    expenseViewModel: ExpenseViewModel,
+    goalViewModel: GoalViewModel
 ) {
     val expenses by expenseViewModel.expenses.collectAsState()
+    val goals by goalViewModel.goals.collectAsState()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -45,7 +47,10 @@ fun StatisticsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            GoalProgressStatsCard()
+            GoalProgressStatsCard(
+                goals = goals,
+                totalExpenses = expenses.sumOf { it.amount }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -71,7 +76,25 @@ fun StatisticsScreen(
 }
 
 @Composable
-fun GoalProgressStatsCard() {
+fun GoalProgressStatsCard(
+    goals: List<com.lumixa.app.data.local.entity.GoalEntity>,
+    totalExpenses: Double
+) {
+
+    val goal = goals.firstOrNull()
+
+    val smartSavedAmount =
+        (totalExpenses * 0.25).coerceAtLeast(0.0)
+
+    val progress =
+        if (goal != null && goal.targetAmount > 0) {
+            (smartSavedAmount / goal.targetAmount)
+                .coerceIn(0.0, 1.0)
+                .toFloat()
+        } else {
+            0f
+        }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
@@ -79,8 +102,13 @@ fun GoalProgressStatsCard() {
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
+
             Text(
-                text = "META: LAPTOP PARA ESTUDIOS",
+                text = if (goal != null) {
+                    "META: ${goal.name.uppercase()}"
+                } else {
+                    "SIN META ACTIVA"
+                },
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF6B7280)
@@ -89,15 +117,21 @@ fun GoalProgressStatsCard() {
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                CircularGoalProgress(progress = 0.38f)
+
+                CircularGoalProgress(progress = progress)
 
                 Spacer(modifier = Modifier.width(20.dp))
 
                 Column {
-                    Text("Ahorrado", fontSize = 12.sp, color = Color(0xFF6B7280))
 
                     Text(
-                        text = "$72.200",
+                        "Ahorrado",
+                        fontSize = 12.sp,
+                        color = Color(0xFF6B7280)
+                    )
+
+                    Text(
+                        text = "$${smartSavedAmount.toInt()}",
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF1FBF9F)
@@ -105,10 +139,18 @@ fun GoalProgressStatsCard() {
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    Text("Meta", fontSize = 12.sp, color = Color(0xFF6B7280))
+                    Text(
+                        "Meta",
+                        fontSize = 12.sp,
+                        color = Color(0xFF6B7280)
+                    )
 
                     Text(
-                        text = "$190.000",
+                        text = if (goal != null) {
+                            "$${goal.targetAmount.toInt()}"
+                        } else {
+                            "$0"
+                        },
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF0F2A44)
@@ -119,7 +161,7 @@ fun GoalProgressStatsCard() {
             Spacer(modifier = Modifier.height(16.dp))
 
             LinearProgressIndicator(
-                progress = { 0.38f },
+                progress = { progress },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp),
@@ -133,10 +175,15 @@ fun GoalProgressStatsCard() {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Avance actual", fontSize = 12.sp, color = Color(0xFF6B7280))
 
                 Text(
-                    text = "38%",
+                    "Avance actual",
+                    fontSize = 12.sp,
+                    color = Color(0xFF6B7280)
+                )
+
+                Text(
+                    text = "${(progress * 100).toInt()}%",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1FBF9F)
