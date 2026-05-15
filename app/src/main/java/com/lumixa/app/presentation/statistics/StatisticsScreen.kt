@@ -61,7 +61,9 @@ fun StatisticsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SmartAnalysisCard()
+            SmartAnalysisCard(
+                expenses = expenses
+            )
 
             Spacer(modifier = Modifier.height(90.dp))
         }
@@ -530,7 +532,28 @@ fun CategoryDistributionRow(
 }
 
 @Composable
-fun SmartAnalysisCard() {
+fun SmartAnalysisCard(
+    expenses: List<com.lumixa.app.data.local.entity.ExpenseEntity>
+) {
+    val total = expenses.sumOf { it.amount }
+
+    val topCategory = expenses
+        .groupBy { it.category }
+        .maxByOrNull { entry ->
+            entry.value.sumOf { it.amount }
+        }
+
+    val topCategoryName = topCategory?.key ?: "Sin datos"
+
+    val topCategoryAmount = topCategory?.value?.sumOf { it.amount } ?: 0.0
+
+    val topCategoryPercent =
+        if (total > 0) {
+            ((topCategoryAmount / total) * 100).toInt()
+        } else {
+            0
+        }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
@@ -548,19 +571,33 @@ fun SmartAnalysisCard() {
             Spacer(modifier = Modifier.height(14.dp))
 
             AnalysisMessage(
-                text = "Gastas más en comida. Representa el 83% de tus gastos actuales."
+                text = if (expenses.isEmpty()) {
+                    "Aún no tienes gastos suficientes para generar un análisis."
+                } else {
+                    "Gastas más en $topCategoryName. Representa el $topCategoryPercent% de tus gastos actuales."
+                }
             )
 
             Spacer(modifier = Modifier.height(10.dp))
 
             AnalysisMessage(
-                text = "Esta semana llevas $204.370 ahorrados. Puedes superar la semana pasada."
+                text = if (total == 0.0) {
+                    "Registra tus primeros gastos para que LUMIXA pueda darte recomendaciones."
+                } else if (topCategoryPercent >= 60) {
+                    "Tu gasto está muy concentrado en $topCategoryName. Intenta definir un límite para esta categoría."
+                } else {
+                    "Tus gastos están relativamente equilibrados entre varias categorías."
+                }
             )
 
             Spacer(modifier = Modifier.height(10.dp))
 
             AnalysisMessage(
-                text = "Vas por buen camino para alcanzar tu meta si mantienes tu ahorro diario."
+                text = if (total > 0) {
+                    "Total analizado: $${total.toInt()}. Sigue registrando tus movimientos para mejorar las recomendaciones."
+                } else {
+                    "Cuando registres más movimientos, el análisis será más preciso."
+                }
             )
         }
     }
