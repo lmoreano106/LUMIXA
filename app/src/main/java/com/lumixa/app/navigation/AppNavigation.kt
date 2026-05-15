@@ -28,12 +28,19 @@ import com.lumixa.app.presentation.viewmodel.GoalViewModelFactory
 import com.lumixa.app.data.repository.SavingsRepository
 import com.lumixa.app.presentation.viewmodel.SavingsViewModel
 import com.lumixa.app.presentation.viewmodel.SavingsViewModelFactory
+import com.lumixa.app.data.repository.AuthRepository
+import com.lumixa.app.presentation.viewmodel.AuthViewModel
+import com.lumixa.app.presentation.viewmodel.AuthViewModelFactory
 @Composable
 fun AppNavigation() {
 
     val navController = rememberNavController()
     val context = LocalContext.current
+    val authRepository = AuthRepository()
 
+    val authViewModel: AuthViewModel = viewModel(
+        factory = AuthViewModelFactory(authRepository)
+    )
     val database = DatabaseProvider.getDatabase(context)
 
     val expenseRepository = ExpenseRepository(
@@ -80,6 +87,7 @@ fun AppNavigation() {
 
         composable(Routes.Login.route) {
             LoginScreen(
+                authViewModel = authViewModel,
                 onLoginClick = {
                     navController.navigate(Routes.Dashboard.route) {
                         popUpTo(Routes.Onboarding.route) {
@@ -99,6 +107,7 @@ fun AppNavigation() {
 
         composable(Routes.Register.route) {
             RegisterScreen(
+                authViewModel = authViewModel,
                 onCreateAccountClick = {
                     navController.navigate(Routes.Currency.route)
                 },

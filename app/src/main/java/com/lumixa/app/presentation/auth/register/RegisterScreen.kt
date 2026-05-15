@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -23,9 +24,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lumixa.app.R
+import com.lumixa.app.presentation.viewmodel.AuthViewModel
 
 @Composable
 fun RegisterScreen(
+    authViewModel: AuthViewModel,
     onCreateAccountClick: () -> Unit,
     onBackToLoginClick: () -> Unit,
     onBackToHomeClick: () -> Unit
@@ -36,6 +39,10 @@ fun RegisterScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var localError by remember { mutableStateOf<String?>(null) }
+
+    val isLoading by authViewModel.isLoading.collectAsState()
+    val authError by authViewModel.authError.collectAsState()
 
     Column(
         modifier = Modifier
@@ -82,8 +89,6 @@ fun RegisterScreen(
         )
 
         Spacer(modifier = Modifier.height(20.dp))
-
-
 
         LumixaTextField(
             label = "NOMBRE COMPLETO",
@@ -150,10 +155,63 @@ fun RegisterScreen(
             )
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
+
+        localError?.let { error ->
+            Text(
+                text = error,
+                modifier = Modifier.fillMaxWidth(),
+                color = Color(0xFFE11D48),
+                fontSize = 12.sp
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        authError?.let { error ->
+            Text(
+                text = error,
+                modifier = Modifier.fillMaxWidth(),
+                color = Color(0xFFE11D48),
+                fontSize = 12.sp
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         Button(
-            onClick = onCreateAccountClick,
+            onClick = {
+                localError = null
+
+                when {
+                    fullName.isBlank() -> {
+                        localError = "Ingresa tu nombre completo"
+                    }
+
+                    username.isBlank() -> {
+                        localError = "Ingresa un username"
+                    }
+
+                    email.isBlank() -> {
+                        localError = "Ingresa tu correo"
+                    }
+
+                    password.length < 6 -> {
+                        localError = "La contraseña debe tener mínimo 6 caracteres"
+                    }
+
+                    else -> {
+                        authViewModel.register(
+                            email = email.trim(),
+                            password = password,
+                            onSuccess = onCreateAccountClick
+                        )
+                    }
+                }
+            },
+            enabled = !isLoading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -162,12 +220,20 @@ fun RegisterScreen(
                 containerColor = Color(0xFF2D6CDF)
             )
         ) {
-            Text(
-                text = "Crear cuenta",
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                color = Color.White
-            )
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(22.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(
+                    text = "Crear cuenta",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Color.White
+                )
+            }
         }
 
         Spacer(modifier = Modifier.weight(1f))

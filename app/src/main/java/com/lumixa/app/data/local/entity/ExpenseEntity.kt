@@ -5,12 +5,21 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "expenses")
 data class ExpenseEntity(
+
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+
+    val userId: String,
+
     val category: String,
+
     val description: String,
+
     val amount: Double,
+
     val date: String,
+
     val time: String,
+
     val dayOfWeek: Int
 )

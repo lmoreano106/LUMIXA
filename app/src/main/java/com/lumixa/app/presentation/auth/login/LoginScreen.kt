@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -23,9 +24,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lumixa.app.R
+import com.lumixa.app.presentation.viewmodel.AuthViewModel
 
 @Composable
 fun LoginScreen(
+    authViewModel: AuthViewModel,
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onBackToHomeClick: () -> Unit
@@ -34,6 +37,9 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    val isLoading by authViewModel.isLoading.collectAsState()
+    val authError by authViewModel.authError.collectAsState()
 
     Column(
         modifier = Modifier
@@ -141,6 +147,17 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
+        authError?.let { error ->
+            Text(
+                text = error,
+                modifier = Modifier.fillMaxWidth(),
+                color = Color(0xFFE11D48),
+                fontSize = 12.sp
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
         Text(
             text = "¿Olvidaste tu contraseña?",
             modifier = Modifier.fillMaxWidth(),
@@ -151,7 +168,18 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(22.dp))
 
         Button(
-            onClick = onLoginClick,
+            onClick = {
+                if (isAdminMode) {
+                    onLoginClick()
+                } else {
+                    authViewModel.login(
+                        email = email.trim(),
+                        password = password,
+                        onSuccess = onLoginClick
+                    )
+                }
+            },
+            enabled = !isLoading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -164,12 +192,20 @@ fun LoginScreen(
                 }
             )
         ) {
-            Text(
-                text = if (isAdminMode) "Ingresar como administrador" else "Iniciar sesión",
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                color = Color.White
-            )
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(22.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(
+                    text = if (isAdminMode) "Ingresar como administrador" else "Iniciar sesión",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Color.White
+                )
+            }
         }
 
         Spacer(modifier = Modifier.weight(1f))
