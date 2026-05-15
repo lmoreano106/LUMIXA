@@ -49,7 +49,9 @@ fun StatisticsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            ExpenseChartCard()
+            ExpenseChartCard(
+                expenses = expenses
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -176,7 +178,9 @@ fun CircularGoalProgress(progress: Float) {
 }
 
 @Composable
-fun ExpenseChartCard() {
+fun ExpenseChartCard(
+    expenses: List<com.lumixa.app.data.local.entity.ExpenseEntity>
+) {
     var chartMode by remember { mutableStateOf("Semana") }
     var periodIndex by remember { mutableStateOf(0) }
 
@@ -192,16 +196,50 @@ fun ExpenseChartCard() {
         "Junio 2026"
     )
 
+    val totalExpenses = expenses.sumOf { it.amount }.toInt()
+
     val weeklyValues = listOf(
-        listOf(22, 35, 18, 42, 28, 55, 30),
-        listOf(35, 18, 42, 28, 55, 22, 40),
-        listOf(15, 25, 33, 20, 48, 38, 29)
+        List(7) { dayIndex ->
+            expenses
+                .filter { it.dayOfWeek == dayIndex }
+                .sumOf { it.amount }
+                .toInt()
+        },
+        List(7) { dayIndex ->
+            expenses
+                .filter { it.dayOfWeek == dayIndex }
+                .sumOf { it.amount }
+                .toInt()
+        },
+        List(7) { dayIndex ->
+            expenses
+                .filter { it.dayOfWeek == dayIndex }
+                .sumOf { it.amount }
+                .toInt()
+        }
     )
 
     val monthlyValues = listOf(
-        listOf(60, 80, 55, 90),
-        listOf(75, 60, 88, 70),
-        listOf(50, 85, 78, 95)
+        listOf(
+            totalExpenses / 4,
+            totalExpenses / 3,
+            totalExpenses / 2,
+            totalExpenses / 2
+        ),
+
+        listOf(
+            totalExpenses / 5,
+            totalExpenses / 4,
+            totalExpenses / 3,
+            totalExpenses / 2
+        ),
+
+        listOf(
+            totalExpenses / 3,
+            totalExpenses / 2,
+            totalExpenses / 4,
+            totalExpenses / 5
+        )
     )
 
     val currentPeriod = if (chartMode == "Semana") {
@@ -210,10 +248,20 @@ fun ExpenseChartCard() {
         monthlyPeriods[periodIndex]
     }
 
-    val values = if (chartMode == "Semana") {
+    val rawValues = if (chartMode == "Semana") {
         weeklyValues[periodIndex]
     } else {
         monthlyValues[periodIndex]
+    }
+
+    val maxValue = rawValues.maxOrNull() ?: 1
+
+    val values = rawValues.map { value ->
+        if (maxValue > 0) {
+            ((value.toFloat() / maxValue.toFloat()) * 95).toInt().coerceAtLeast(8)
+        } else {
+            8
+        }
     }
 
     val labels = if (chartMode == "Semana") {
@@ -318,7 +366,7 @@ fun ExpenseChartCard() {
                         Box(
                             modifier = Modifier
                                 .width(if (chartMode == "Semana") 18.dp else 32.dp)
-                                .height((value * 0.75).dp)
+                                .height(value.dp)
                                 .background(
                                     color = Color(0xFF2D6CDF),
                                     shape = RoundedCornerShape(10.dp)

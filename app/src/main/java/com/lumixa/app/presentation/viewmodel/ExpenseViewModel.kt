@@ -39,7 +39,8 @@ class ExpenseViewModel(
         description: String,
         amount: Double,
         date: String,
-        time: String
+        time: String,
+        dayOfWeek: Int
     ) {
 
         viewModelScope.launch {
@@ -50,7 +51,8 @@ class ExpenseViewModel(
                     description = description,
                     amount = amount,
                     date = date,
-                    time = time
+                    time = time,
+                            dayOfWeek = dayOfWeek
                 )
             )
         }

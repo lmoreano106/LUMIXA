@@ -16,7 +16,9 @@ object DatabaseProvider {
                 context.applicationContext,
                 LumixaDatabase::class.java,
                 "lumixa_database"
-            ).build()
+            )
+                .fallbackToDestructiveMigration()
+                .build()
 
             database = instance
 

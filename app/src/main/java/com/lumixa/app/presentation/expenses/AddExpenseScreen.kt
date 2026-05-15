@@ -20,6 +20,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @Composable
 fun AddExpenseScreen(
@@ -181,12 +184,22 @@ fun AddExpenseScreen(
                         "Sin descripción"
                     }
 
+                val calendar = Calendar.getInstance()
+
+                val dateFormat = SimpleDateFormat("dd MMMM yyyy", Locale("es", "ES"))
+                val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
+
+                val currentDate = dateFormat.format(calendar.time)
+                val currentTime = timeFormat.format(calendar.time)
+                val currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1
+
                 expenseViewModel.addExpense(
                     category = finalCategory,
                     description = finalDescription,
                     amount = amount.toDoubleOrNull() ?: 0.0,
-                    date = "14 mayo 2026",
-                    time = "4:20 PM"
+                    date = currentDate,
+                    time = currentTime,
+                    dayOfWeek = currentDayOfWeek
                 )
 
                 onSaveClick()

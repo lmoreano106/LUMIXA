@@ -12,7 +12,7 @@ import com.lumixa.app.data.local.entity.IncomeEntity
         ExpenseEntity::class,
         IncomeEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class LumixaDatabase : RoomDatabase() {
