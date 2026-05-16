@@ -89,6 +89,11 @@ fun AppNavigation() {
             LoginScreen(
                 authViewModel = authViewModel,
                 onLoginClick = {
+                    incomeViewModel.refreshIncomes()
+                    expenseViewModel.refreshExpenses()
+                    goalViewModel.refreshGoals()
+                    savingsViewModel.refreshSavings()
+
                     navController.navigate(Routes.Dashboard.route) {
                         popUpTo(Routes.Onboarding.route) {
                             inclusive = true
@@ -109,6 +114,11 @@ fun AppNavigation() {
             RegisterScreen(
                 authViewModel = authViewModel,
                 onCreateAccountClick = {
+                    incomeViewModel.refreshIncomes()
+                    expenseViewModel.refreshExpenses()
+                    goalViewModel.refreshGoals()
+                    savingsViewModel.refreshSavings()
+
                     navController.navigate(Routes.Currency.route)
                 },
                 onBackToLoginClick = {
@@ -161,10 +171,23 @@ fun AppNavigation() {
                 },
 
                 onLogoutClick = {
+
+                    authViewModel.logout()
+
+                    incomeViewModel.clearData()
+
+                    expenseViewModel.clearData()
+
+                    goalViewModel.clearData()
+
+                    savingsViewModel.clearData()
+
                     navController.navigate(Routes.Login.route) {
+
                         popUpTo(Routes.Onboarding.route) {
                             inclusive = true
                         }
+
                         launchSingleTop = true
                     }
                 }

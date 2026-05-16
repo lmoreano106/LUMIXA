@@ -8,15 +8,26 @@ class IncomeRepository(
     private val incomeDao: IncomeDao
 ) {
 
-    suspend fun insertIncome(income: IncomeEntity) {
+    suspend fun insertIncome(
+        income: IncomeEntity
+    ) {
         incomeDao.insertIncome(income)
     }
 
-    fun getAllIncomes(): Flow<List<IncomeEntity>> {
-        return incomeDao.getAllIncomes()
+    fun getAllIncomes(
+        userId: String
+    ): Flow<List<IncomeEntity>> {
+
+        return incomeDao.getAllIncomes(
+            userId = userId
+        )
     }
 
-    suspend fun deleteIncome(incomeId: Int) {
-        incomeDao.deleteIncome(incomeId)
+    suspend fun deleteIncome(
+        incomeId: Int
+    ) {
+        incomeDao.deleteIncome(
+            incomeId = incomeId
+        )
     }
 }

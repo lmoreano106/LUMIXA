@@ -7,15 +7,27 @@ import kotlinx.coroutines.flow.Flow
 class GoalRepository(
     private val goalDao: GoalDao
 ) {
-    suspend fun insertGoal(goal: GoalEntity) {
+
+    suspend fun insertGoal(
+        goal: GoalEntity
+    ) {
         goalDao.insertGoal(goal)
     }
 
-    fun getAllGoals(): Flow<List<GoalEntity>> {
-        return goalDao.getAllGoals()
+    fun getAllGoals(
+        userId: String
+    ): Flow<List<GoalEntity>> {
+
+        return goalDao.getAllGoals(
+            userId = userId
+        )
     }
 
-    suspend fun deleteGoal(goalId: Int) {
-        goalDao.deleteGoal(goalId)
+    suspend fun deleteGoal(
+        goalId: Int
+    ) {
+        goalDao.deleteGoal(
+            goalId = goalId
+        )
     }
 }

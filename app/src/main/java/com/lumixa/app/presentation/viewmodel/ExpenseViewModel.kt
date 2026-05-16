@@ -2,8 +2,10 @@ package com.lumixa.app.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.lumixa.app.data.local.entity.ExpenseEntity
 import com.lumixa.app.data.repository.ExpenseRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,6 +15,10 @@ class ExpenseViewModel(
     private val repository: ExpenseRepository
 ) : ViewModel() {
 
+    private val firebaseAuth = FirebaseAuth.getInstance()
+
+    private var expensesJob: Job? = null
+
     private val _expenses =
         MutableStateFlow<List<ExpenseEntity>>(emptyList())
 
@@ -20,16 +26,26 @@ class ExpenseViewModel(
         _expenses.asStateFlow()
 
     init {
-        getExpenses()
+        refreshExpenses()
     }
 
-    private fun getExpenses() {
+    private fun getCurrentUserId(): String {
+        return firebaseAuth.currentUser?.uid ?: ""
+    }
 
-        viewModelScope.launch {
+    fun refreshExpenses() {
+        expensesJob?.cancel()
 
-            repository.getAllExpenses().collect {
+        val userId = getCurrentUserId()
 
-                _expenses.value = it
+        if (userId.isBlank()) {
+            _expenses.value = emptyList()
+            return
+        }
+
+        expensesJob = viewModelScope.launch {
+            repository.getAllExpenses(userId).collect { expensesList ->
+                _expenses.value = expensesList
             }
         }
     }
@@ -42,27 +58,35 @@ class ExpenseViewModel(
         time: String,
         dayOfWeek: Int
     ) {
-
         viewModelScope.launch {
+            val userId = getCurrentUserId()
 
-            repository.insertExpense(
-                ExpenseEntity(
-                    category = category,
-                    description = description,
-                    amount = amount,
-                    date = date,
-                    time = time,
-                            dayOfWeek = dayOfWeek
+            if (userId.isNotBlank()) {
+                repository.insertExpense(
+                    ExpenseEntity(
+                        userId = userId,
+                        category = category,
+                        description = description,
+                        amount = amount,
+                        date = date,
+                        time = time,
+                        dayOfWeek = dayOfWeek
+                    )
                 )
-            )
+
+                refreshExpenses()
+            }
         }
     }
 
     fun deleteExpense(id: Int) {
-
         viewModelScope.launch {
-
             repository.deleteExpense(id)
+            refreshExpenses()
         }
+    }
+    fun clearData() {
+        expensesJob?.cancel()
+        _expenses.value = emptyList()
     }
 }

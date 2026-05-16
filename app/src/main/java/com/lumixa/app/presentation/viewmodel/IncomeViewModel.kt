@@ -2,8 +2,10 @@ package com.lumixa.app.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.lumixa.app.data.local.entity.IncomeEntity
 import com.lumixa.app.data.repository.IncomeRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,6 +15,10 @@ class IncomeViewModel(
     private val repository: IncomeRepository
 ) : ViewModel() {
 
+    private val firebaseAuth = FirebaseAuth.getInstance()
+
+    private var incomesJob: Job? = null
+
     private val _incomes =
         MutableStateFlow<List<IncomeEntity>>(emptyList())
 
@@ -20,16 +26,26 @@ class IncomeViewModel(
         _incomes.asStateFlow()
 
     init {
-        getIncomes()
+        refreshIncomes()
     }
 
-    private fun getIncomes() {
+    private fun getCurrentUserId(): String {
+        return firebaseAuth.currentUser?.uid ?: ""
+    }
 
-        viewModelScope.launch {
+    fun refreshIncomes() {
+        incomesJob?.cancel()
 
-            repository.getAllIncomes().collect {
+        val userId = getCurrentUserId()
 
-                _incomes.value = it
+        if (userId.isBlank()) {
+            _incomes.value = emptyList()
+            return
+        }
+
+        incomesJob = viewModelScope.launch {
+            repository.getAllIncomes(userId).collect { incomesList ->
+                _incomes.value = incomesList
             }
         }
     }
@@ -41,26 +57,35 @@ class IncomeViewModel(
         date: String,
         time: String
     ) {
-
         viewModelScope.launch {
+            val userId = getCurrentUserId()
 
-            repository.insertIncome(
-                IncomeEntity(
-                    amount = amount,
-                    type = type,
-                    description = description,
-                    date = date,
-                    time = time
+            if (userId.isNotBlank()) {
+                repository.insertIncome(
+                    IncomeEntity(
+                        userId = userId,
+                        amount = amount,
+                        type = type,
+                        description = description,
+                        date = date,
+                        time = time
+                    )
                 )
-            )
+
+                refreshIncomes()
+            }
         }
     }
 
     fun deleteIncome(id: Int) {
-
         viewModelScope.launch {
-
             repository.deleteIncome(id)
+            refreshIncomes()
         }
+    }
+
+    fun clearData() {
+        incomesJob?.cancel()
+        _incomes.value = emptyList()
     }
 }

@@ -15,22 +15,34 @@ interface SavingsDao {
         saving: SavingsEntity
     )
 
-    @Query("SELECT * FROM savings ORDER BY id DESC")
-    fun getAllSavings(): Flow<List<SavingsEntity>>
+    @Query(
+        "SELECT * FROM savings WHERE userId = :userId ORDER BY id DESC"
+    )
+    fun getAllSavings(
+        userId: String
+    ): Flow<List<SavingsEntity>>
 
-    @Query("SELECT SUM(amount) FROM savings")
-    fun getTotalSavings(): Flow<Double?>
+    @Query(
+        "SELECT SUM(amount) FROM savings WHERE userId = :userId"
+    )
+    fun getTotalSavings(
+        userId: String
+    ): Flow<Double?>
 
-    @Query("SELECT * FROM savings WHERE date = :date LIMIT 1")
+    @Query(
+        "SELECT * FROM savings WHERE userId = :userId AND date = :date LIMIT 1"
+    )
     suspend fun getSavingByDate(
+        userId: String,
         date: String
     ): SavingsEntity?
 
-    @Query("UPDATE savings SET amount = :amount WHERE date = :date")
+    @Query(
+        "UPDATE savings SET amount = :amount WHERE userId = :userId AND date = :date"
+    )
     suspend fun updateSavingByDate(
+        userId: String,
         amount: Double,
         date: String
     )
-
-    
 }
