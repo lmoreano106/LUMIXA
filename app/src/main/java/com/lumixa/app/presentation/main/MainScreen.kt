@@ -9,11 +9,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.lumixa.app.presentation.dashboard.DashboardScreen
 import com.lumixa.app.presentation.expenses.ExpensesScreen
+import com.lumixa.app.presentation.profile.ProfileScreen
 import com.lumixa.app.presentation.statistics.StatisticsScreen
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 import com.lumixa.app.presentation.viewmodel.GoalViewModel
 import com.lumixa.app.presentation.viewmodel.IncomeViewModel
 import com.lumixa.app.presentation.viewmodel.SavingsViewModel
+
 @Composable
 fun MainScreen(
     expenseViewModel: ExpenseViewModel,
@@ -74,6 +76,19 @@ fun MainScreen(
                         Text("📊")
                     }
                 )
+
+                NavigationBarItem(
+                    selected = selectedTab == 3,
+                    onClick = {
+                        selectedTab = 3
+                    },
+                    label = {
+                        Text("Perfil")
+                    },
+                    icon = {
+                        Text("👤")
+                    }
+                )
             }
         }
 
@@ -90,7 +105,7 @@ fun MainScreen(
                 onAddIncomeClick = onAddIncomeClick,
                 onGoalClick = onGoalClick,
                 onLogoutClick = onLogoutClick,
-                        savingsViewModel = savingsViewModel
+                savingsViewModel = savingsViewModel
             )
 
             1 -> ExpensesScreen(
@@ -101,6 +116,10 @@ fun MainScreen(
                 expenseViewModel = expenseViewModel,
                 goalViewModel = goalViewModel,
                 savingsViewModel = savingsViewModel
+            )
+
+            3 -> ProfileScreen(
+                onLogoutClick = onLogoutClick
             )
         }
     }
