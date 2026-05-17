@@ -31,7 +31,7 @@ import com.lumixa.app.presentation.viewmodel.SavingsViewModelFactory
 import com.lumixa.app.data.repository.AuthRepository
 import com.lumixa.app.presentation.viewmodel.AuthViewModel
 import com.lumixa.app.presentation.viewmodel.AuthViewModelFactory
-
+import com.lumixa.app.presentation.goals.GoalDetailScreen
 
 @Composable
 fun AppNavigation() {
@@ -172,7 +172,7 @@ fun AppNavigation() {
                 },
 
                 onGoalClick = {
-                    navController.navigate(Routes.CreateGoal.route)
+                    navController.navigate(Routes.GoalDetail.route)
                 },
 
                 onLogoutClick = {
@@ -235,7 +235,15 @@ fun AppNavigation() {
                 }
             )
         }
-
+        composable(Routes.GoalDetail.route) {
+            GoalDetailScreen(
+                goalViewModel = goalViewModel,
+                savingsViewModel = savingsViewModel,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
         composable(Routes.Expenses.route) {}
         composable(Routes.Statistics.route) {}
         composable(Routes.Goal.route) {}

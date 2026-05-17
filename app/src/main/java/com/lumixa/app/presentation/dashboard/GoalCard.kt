@@ -93,7 +93,7 @@ fun GoalCard(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "$${smartSavedAmount.toInt()} ahorrado hoy",
+                        text = "$${smartSavedAmount.toInt()} ahorrado acumulado",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF0F2A44)
