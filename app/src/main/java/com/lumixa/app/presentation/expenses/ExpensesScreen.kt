@@ -51,7 +51,17 @@ fun ExpensesScreen(
         } ?: formatter.format(Date())
     }
 
-    val totalExpenses = expenses.sumOf { it.amount }
+    val todayDate = remember {
+        formatter.format(Date())
+    }
+
+    val todayExpenses = expenses.filter {
+        it.date == todayDate
+    }
+
+    val totalToday = todayExpenses.sumOf { it.amount }
+
+    val totalWeek = expenses.sumOf { it.amount }
 
     val filteredByDate = expenses.filter {
         it.date == selectedDate
@@ -129,9 +139,9 @@ fun ExpensesScreen(
         when (selectedTab) {
             0 -> {
                 RealExpensesList(
-                    title = "Todos los gastos",
-                    total = "$${totalExpenses.toInt()}",
-                    expenses = expenses,
+                    title = "Gastos de hoy",
+                    total = "$${totalToday.toInt()}",
+                    expenses = todayExpenses,
                     onExpenseClick = {
                         selectedExpense = it
                     }
@@ -139,9 +149,8 @@ fun ExpensesScreen(
             }
 
             1 -> {
-                RealExpensesList(
-                    title = "Últimos gastos",
-                    total = "$${totalExpenses.toInt()}",
+                WeeklyExpensesList(
+                    total = "$${totalWeek.toInt()}",
                     expenses = expenses,
                     onExpenseClick = {
                         selectedExpense = it
@@ -178,6 +187,110 @@ fun ExpensesScreen(
                     expenseViewModel.deleteExpense(expense.id)
                     selectedExpense = null
                 }
+            )
+        }
+    }
+}
+
+@Composable
+fun WeeklyExpensesList(
+    total: String,
+    expenses: List<ExpenseEntity>,
+    onExpenseClick: (ExpenseEntity) -> Unit
+) {
+    val dayNames = listOf(
+        "Domingo",
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado"
+    )
+
+    val groupedExpenses = expenses
+        .groupBy { it.dayOfWeek }
+        .toSortedMap()
+
+    LazyColumn {
+        item {
+            SummaryExpenseCard(
+                title = "Gasto semanal",
+                total = total
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (expenses.isEmpty()) {
+            item {
+                EmptyExpensesCard(
+                    text = "No tienes gastos esta semana"
+                )
+            }
+        }
+
+        groupedExpenses.forEach { (dayIndex, dayExpenses) ->
+
+            val dayName = dayNames.getOrNull(dayIndex) ?: "Día"
+            val dayTotal = dayExpenses.sumOf { it.amount }
+
+            item {
+                DayExpenseHeader(
+                    dayName = dayName,
+                    total = "$${dayTotal.toInt()}"
+                )
+            }
+
+            items(dayExpenses.reversed()) { expense ->
+                ExpenseItem(
+                    category = expense.category,
+                    description = expense.description,
+                    amount = "$${expense.amount.toInt()}",
+                    time = expense.time,
+                    onClick = {
+                        onExpenseClick(expense)
+                    }
+                )
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun DayExpenseHeader(
+    dayName: String,
+    total: String
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 10.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFEAF1FF)
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = dayName,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF0F2A44)
+            )
+
+            Text(
+                text = total,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF2D6CDF)
             )
         }
     }

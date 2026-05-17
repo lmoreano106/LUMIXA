@@ -21,26 +21,24 @@ class AuthViewModel(
     fun register(
         email: String,
         password: String,
+        fullName: String,
         onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
-
             _isLoading.value = true
             _authError.value = null
 
             val result = repository.register(
                 email = email,
-                password = password
+                password = password,
+                fullName = fullName
             )
 
             _isLoading.value = false
 
             if (result.isSuccess) {
-
                 onSuccess()
-
             } else {
-
                 _authError.value = getSpanishAuthError(
                     result.exceptionOrNull()
                 )

@@ -32,6 +32,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun DashboardScreen(
@@ -93,6 +94,10 @@ fun DashboardScreen(
             date = todayDate
         )
     }
+    val userName =
+        FirebaseAuth.getInstance().currentUser?.displayName
+            ?: FirebaseAuth.getInstance().currentUser?.email?.substringBefore("@")
+            ?: "Usuario"
 
     LazyColumn(
         modifier = modifier
@@ -119,7 +124,7 @@ fun DashboardScreen(
                     )
 
                     Text(
-                        text = "Hola, Usuario 👋",
+                        text = "Hola, $userName 👋",
                         fontSize = 25.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF0F2A44)

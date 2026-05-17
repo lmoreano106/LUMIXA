@@ -206,6 +206,7 @@ fun RegisterScreen(
                         authViewModel.register(
                             email = email.trim(),
                             password = password,
+                            fullName = username.trim(),
                             onSuccess = onCreateAccountClick
                         )
                     }

@@ -20,9 +20,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lumixa.app.presentation.viewmodel.IncomeViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun IncomeScreen(
+    incomeViewModel: IncomeViewModel,
     onContinueClick: () -> Unit
 ) {
     var income by remember { mutableStateOf("") }
@@ -151,13 +156,35 @@ fun IncomeScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            onClick = onContinueClick,
+            onClick = {
+                val dateFormat = SimpleDateFormat(
+                    "dd MMMM yyyy",
+                    Locale("es", "ES")
+                )
+
+                val timeFormat = SimpleDateFormat(
+                    "hh:mm a",
+                    Locale.getDefault()
+                )
+
+                incomeViewModel.addIncome(
+                    amount = monthlyIncome,
+                    type = "Sueldo",
+                    description = "Ingreso inicial configurado",
+                    date = dateFormat.format(Date()),
+                    time = timeFormat.format(Date())
+                )
+
+                onContinueClick()
+            },
+            enabled = monthlyIncome > 0,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF2D6CDF)
+                containerColor = Color(0xFF2D6CDF),
+                disabledContainerColor = Color(0xFF9CA3AF)
             )
         ) {
             Text(

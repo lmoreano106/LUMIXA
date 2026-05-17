@@ -31,6 +31,8 @@ import com.lumixa.app.presentation.viewmodel.SavingsViewModelFactory
 import com.lumixa.app.data.repository.AuthRepository
 import com.lumixa.app.presentation.viewmodel.AuthViewModel
 import com.lumixa.app.presentation.viewmodel.AuthViewModelFactory
+
+
 @Composable
 fun AppNavigation() {
 
@@ -140,7 +142,10 @@ fun AppNavigation() {
 
         composable(Routes.Income.route) {
             IncomeScreen(
+                incomeViewModel = incomeViewModel,
                 onContinueClick = {
+                    incomeViewModel.refreshIncomes()
+
                     navController.navigate(Routes.Dashboard.route) {
                         popUpTo(Routes.Onboarding.route) {
                             inclusive = true
