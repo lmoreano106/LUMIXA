@@ -16,8 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -167,7 +165,7 @@ fun ExpenseTrendCard(expenses: List<ExpenseEntity>, currencySymbol: String) {
     }
     val total = periodData.values.sum()
     val maxValue = (periodData.values.maxOrNull() ?: 1.0).coerceAtLeast(1.0)
-
+    val primaryColor = MaterialTheme.colorScheme.primary
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
@@ -203,7 +201,7 @@ fun ExpenseTrendCard(expenses: List<ExpenseEntity>, currencySymbol: String) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(onClick = { periodOffset-- }) {
-                    Icon(imageVector = Icons.Default.ChevronLeft, contentDescription = "Periodo anterior")
+                    Text("‹", fontSize = 28.sp, fontWeight = FontWeight.Bold)
                 }
                 Text(
                     text = periodData.title,
@@ -212,7 +210,7 @@ fun ExpenseTrendCard(expenses: List<ExpenseEntity>, currencySymbol: String) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 IconButton(onClick = { periodOffset++ }) {
-                    Icon(imageVector = Icons.Default.ChevronRight, contentDescription = "Periodo siguiente")
+                    Text("›", fontSize = 28.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
@@ -229,10 +227,10 @@ fun ExpenseTrendCard(expenses: List<ExpenseEntity>, currencySymbol: String) {
                 val path = Path().apply {
                     points.forEachIndexed { i, point -> if (i == 0) moveTo(point.x, point.y) else lineTo(point.x, point.y) }
                 }
-                drawPath(path = path, color = MaterialTheme.colorScheme.primary, style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round))
+                drawPath(path = path, color = primaryColor, style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round))
 
                 points.forEach { point ->
-                    drawCircle(color = MaterialTheme.colorScheme.primary, radius = 5.dp.toPx(), center = point)
+                    drawCircle(color = primaryColor, radius = 5.dp.toPx(), center = point)
                     drawCircle(color = Color.White, radius = 2.5.dp.toPx(), center = point)
                 }
             }
@@ -313,7 +311,7 @@ fun CategoryDistributionCard(expenses: List<ExpenseEntity>, currencySymbol: Stri
     val total = expenses.sumOf { it.amount }
     val grouped = expenses.groupBy { it.category }.mapValues { (_, list) -> list.sumOf { it.amount } }.toList().sortedByDescending { it.second }
     val colors = listOf(Color(0xFF2D6CDF), Color(0xFF1FBF9F), Color(0xFFF59E0B), Color(0xFF8B5CF6), Color(0xFFEF4444))
-
+    val surfaceColor = MaterialTheme.colorScheme.surface
     Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)) {
         Column(modifier = Modifier.padding(18.dp)) {
             Text("DISTRIBUCIÓN POR CATEGORÍA", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -327,7 +325,7 @@ fun CategoryDistributionCard(expenses: List<ExpenseEntity>, currencySymbol: Stri
                         drawArc(color = colors[index % colors.size], startAngle = startAngle, sweepAngle = sweep, useCenter = true, topLeft = Offset(size.width / 2 - 65.dp.toPx(), 10.dp.toPx()), size = Size(130.dp.toPx(), 130.dp.toPx()))
                         startAngle += sweep
                     }
-                    drawCircle(color = MaterialTheme.colorScheme.surface, radius = 38.dp.toPx(), center = Offset(size.width / 2, 75.dp.toPx()))
+                    drawCircle(color = surfaceColor, radius = 38.dp.toPx(), center = Offset(size.width / 2, 75.dp.toPx()))
                 }
             }
 
