@@ -193,24 +193,30 @@ fun ExpensesScreen(
 }
 
 @Composable
+
 fun WeeklyExpensesList(
     total: String,
     expenses: List<ExpenseEntity>,
     onExpenseClick: (ExpenseEntity) -> Unit
 ) {
-    val dayNames = listOf(
-        "Domingo",
-        "Lunes",
-        "Martes",
-        "Miércoles",
-        "Jueves",
-        "Viernes",
-        "Sábado"
-    )
+    val dateFormatter = remember {
+        SimpleDateFormat("dd MMMM yyyy", Locale("es", "ES"))
+    }
+
+    val dayFormatter = remember {
+        SimpleDateFormat("EEEE", Locale("es", "ES"))
+    }
 
     val groupedExpenses = expenses
-        .groupBy { it.dayOfWeek }
-        .toSortedMap()
+        .groupBy { it.date }
+        .toList()
+        .sortedByDescending { (date, _) ->
+            try {
+                dateFormatter.parse(date)?.time ?: 0L
+            } catch (e: Exception) {
+                0L
+            }
+        }
 
     LazyColumn {
         item {
@@ -230,19 +236,31 @@ fun WeeklyExpensesList(
             }
         }
 
-        groupedExpenses.forEach { (dayIndex, dayExpenses) ->
+        groupedExpenses.forEach { (date, dayExpenses) ->
 
-            val dayName = dayNames.getOrNull(dayIndex) ?: "Día"
+            val parsedDate = try {
+                dateFormatter.parse(date)
+            } catch (e: Exception) {
+                null
+            }
+
+            val dayName = parsedDate?.let {
+                dayFormatter.format(it).replaceFirstChar { char ->
+                    char.uppercase()
+                }
+            } ?: "Día"
+
             val dayTotal = dayExpenses.sumOf { it.amount }
 
             item {
                 DayExpenseHeader(
                     dayName = dayName,
+                    date = date,
                     total = "$${dayTotal.toInt()}"
                 )
             }
 
-            items(dayExpenses.reversed()) { expense ->
+            items(dayExpenses.sortedByDescending { it.id }) { expense ->
                 ExpenseItem(
                     category = expense.category,
                     description = expense.description,
@@ -264,6 +282,7 @@ fun WeeklyExpensesList(
 @Composable
 fun DayExpenseHeader(
     dayName: String,
+    date: String,
     total: String
 ) {
     Card(
@@ -279,12 +298,22 @@ fun DayExpenseHeader(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = dayName,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF0F2A44)
-            )
+            Column {
+                Text(
+                    text = dayName,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F2A44)
+                )
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Text(
+                    text = date,
+                    fontSize = 11.sp,
+                    color = Color(0xFF6B7280)
+                )
+            }
 
             Text(
                 text = total,
