@@ -172,7 +172,11 @@ fun AppNavigation() {
                 },
 
                 onGoalClick = {
-                    navController.navigate(Routes.GoalDetail.route)
+                    if (goalViewModel.goals.value.isEmpty()) {
+                        navController.navigate(Routes.CreateGoal.route)
+                    } else {
+                        navController.navigate(Routes.GoalDetail.route)
+                    }
                 },
 
                 onLogoutClick = {
@@ -235,18 +239,32 @@ fun AppNavigation() {
                 }
             )
         }
+        composable(Routes.Goal.route) {
+            CreateGoalScreen(
+                goalViewModel = goalViewModel,
+                existingGoal = goalViewModel.goals.value.firstOrNull(),
+                onSaveClick = {
+                    navController.popBackStack()
+                },
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
         composable(Routes.GoalDetail.route) {
             GoalDetailScreen(
                 goalViewModel = goalViewModel,
                 savingsViewModel = savingsViewModel,
                 onBackClick = {
                     navController.popBackStack()
+                },
+                onEditClick = {
+                    navController.navigate(Routes.Goal.route)
                 }
             )
         }
         composable(Routes.Expenses.route) {}
         composable(Routes.Statistics.route) {}
-        composable(Routes.Goal.route) {}
         composable(Routes.Admin.route) {}
     }
 }

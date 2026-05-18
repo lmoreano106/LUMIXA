@@ -14,6 +14,12 @@ class GoalRepository(
         goalDao.insertGoal(goal)
     }
 
+    suspend fun updateGoal(
+        goal: GoalEntity
+    ) {
+        goalDao.updateGoal(goal)
+    }
+
     fun getAllGoals(
         userId: String
     ): Flow<List<GoalEntity>> {

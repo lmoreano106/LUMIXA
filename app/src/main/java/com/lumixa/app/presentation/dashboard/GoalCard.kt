@@ -8,12 +8,15 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lumixa.app.data.local.entity.GoalEntity
+import com.lumixa.app.data.preferences.CurrencyPreferences
 
 @Composable
 fun GoalCard(
@@ -21,19 +24,38 @@ fun GoalCard(
     savingsToday: Double,
     onClick: () -> Unit = {}
 ) {
+
+    val context = LocalContext.current
+
+    val currencyPreferences = remember {
+        CurrencyPreferences(context)
+    }
+
+    val currencySymbol =
+        currencyPreferences.getCurrencySymbol()
+
     val goal = goals.firstOrNull()
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
+
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 3.dp
+        )
     ) {
+
         Column(
             modifier = Modifier.padding(18.dp)
         ) {
+
             Text(
                 text = "Meta inteligente",
                 fontSize = 18.sp,
@@ -44,6 +66,7 @@ fun GoalCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             if (goal == null) {
+
                 Text(
                     text = "Aún no tienes metas creadas",
                     fontSize = 13.sp,
@@ -58,7 +81,9 @@ fun GoalCard(
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF2D6CDF)
                 )
+
             } else {
+
                 val smartSavedAmount =
                     savingsToday.coerceAtLeast(0.0)
 
@@ -79,10 +104,13 @@ fun GoalCard(
 
                 LinearProgressIndicator(
                     progress = { progress },
+
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp),
+
                     color = Color(0xFF1FBF9F),
+
                     trackColor = Color(0xFFE5E7EB)
                 )
 
@@ -90,10 +118,12 @@ fun GoalCard(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
+
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+
                     Text(
-                        text = "$${smartSavedAmount.toInt()} ahorrado acumulado",
+                        text = "${currencySymbol}${smartSavedAmount.toInt()} ahorrado",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF0F2A44)
@@ -110,9 +140,12 @@ fun GoalCard(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
-                    text = "Meta: $${goal.targetAmount.toInt()} · Fecha: ${goal.targetDate}",
+                    text = "Meta: ${currencySymbol}${goal.targetAmount.toInt()} · Fecha: ${goal.targetDate}",
+
                     fontSize = 12.sp,
+
                     lineHeight = 18.sp,
+
                     color = Color(0xFF6B7280)
                 )
             }

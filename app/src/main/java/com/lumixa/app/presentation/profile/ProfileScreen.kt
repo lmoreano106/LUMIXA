@@ -17,6 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import com.lumixa.app.data.preferences.CurrencyPreferences
 
 @Composable
 fun ProfileScreen(
@@ -31,7 +34,17 @@ fun ProfileScreen(
 
     val email =
         user?.email ?: "Sin correo"
+    val context = LocalContext.current
 
+    val currencyPreferences = remember {
+        CurrencyPreferences(context)
+    }
+
+    val currencyCode =
+        currencyPreferences.getCurrencyCode()
+
+    val currencyName =
+        currencyPreferences.getCurrencyName()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -94,7 +107,7 @@ fun ProfileScreen(
 
         ProfileInfoCard(
             title = "Moneda",
-            value = "COP - Peso colombiano"
+            value = "$currencyCode - $currencyName"
         )
 
         Spacer(modifier = Modifier.height(12.dp))

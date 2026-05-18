@@ -81,6 +81,18 @@ class GoalViewModel(
         }
     }
 
+    fun updateGoal(
+        goal: GoalEntity
+    ) {
+
+        viewModelScope.launch {
+
+            repository.updateGoal(goal)
+
+            refreshGoals()
+        }
+    }
+
     fun deleteGoal(id: Int) {
 
         viewModelScope.launch {

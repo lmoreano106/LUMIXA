@@ -20,12 +20,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+import androidx.compose.ui.platform.LocalContext
+import com.lumixa.app.data.preferences.CurrencyPreferences
+
 @Composable
 fun CurrencyScreen(
     onContinueClick: () -> Unit
 ) {
     var selectedCurrency by remember { mutableStateOf("COP") }
+    val context = LocalContext.current
 
+    val currencyPreferences = remember {
+        CurrencyPreferences(context)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -92,11 +99,36 @@ fun CurrencyScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            onClick = onContinueClick,
+            onClick = {
+
+                when (selectedCurrency) {
+
+                    "COP" -> {
+                        currencyPreferences.saveCurrency(
+                            code = "COP",
+                            name = "Pesos colombianos",
+                            symbol = "$"
+                        )
+                    }
+
+                    "PEN" -> {
+                        currencyPreferences.saveCurrency(
+                            code = "PEN",
+                            name = "Soles peruanos",
+                            symbol = "S/"
+                        )
+                    }
+                }
+
+                onContinueClick()
+            },
+
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
+
             shape = RoundedCornerShape(16.dp),
+
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF2D6CDF)
             )

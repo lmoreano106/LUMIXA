@@ -16,13 +16,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.auth.FirebaseAuth
+import com.lumixa.app.data.preferences.CurrencyPreferences
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 import com.lumixa.app.presentation.viewmodel.GoalViewModel
 import com.lumixa.app.presentation.viewmodel.IncomeViewModel
@@ -32,7 +36,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
-import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun DashboardScreen(
@@ -50,6 +53,15 @@ fun DashboardScreen(
     val incomes by incomeViewModel.incomes.collectAsState()
     val goals by goalViewModel.goals.collectAsState()
     val savings by savingsViewModel.savings.collectAsState()
+
+    val context = LocalContext.current
+
+    val currencyPreferences = remember {
+        CurrencyPreferences(context)
+    }
+
+    val currencySymbol =
+        currencyPreferences.getCurrencySymbol()
 
     val todayDate =
         SimpleDateFormat("dd MMMM yyyy", Locale("es", "ES")).format(Date())
@@ -94,6 +106,7 @@ fun DashboardScreen(
             date = todayDate
         )
     }
+
     val userName =
         FirebaseAuth.getInstance().currentUser?.displayName
             ?: FirebaseAuth.getInstance().currentUser?.email?.substringBefore("@")
@@ -156,6 +169,7 @@ fun DashboardScreen(
             BalanceCard(
                 monthlyIncome = monthlyIncome,
                 totalExpenses = totalExpenses,
+                currencySymbol = currencySymbol,
                 onAddIncomeClick = onAddIncomeClick
             )
 
@@ -165,7 +179,8 @@ fun DashboardScreen(
                 dailyBudget = dailyBudget,
                 spentToday = spentToday,
                 availableToday = availableToday,
-                savingsToday = savingsToday
+                savingsToday = savingsToday,
+                currencySymbol = currencySymbol
             )
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -174,7 +189,8 @@ fun DashboardScreen(
                 spentToday = spentToday,
                 availableToday = availableToday,
                 savingsToday = savingsToday,
-                totalSavings = totalSavings
+                totalSavings = totalSavings,
+                currencySymbol = currencySymbol
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -230,6 +246,7 @@ fun DashboardScreen(
 fun BalanceCard(
     monthlyIncome: Double,
     totalExpenses: Double,
+    currencySymbol: String,
     onAddIncomeClick: () -> Unit
 ) {
     val currentBalance = monthlyIncome - totalExpenses
@@ -300,7 +317,7 @@ fun BalanceCard(
             Spacer(modifier = Modifier.height(18.dp))
 
             Text(
-                text = "$${currentBalance.toInt()}",
+                text = "${currencySymbol}${currentBalance.toInt()}",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF0F2A44)
@@ -313,14 +330,14 @@ fun BalanceCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "↑ Ingresos: $${monthlyIncome.toInt()}",
+                    text = "↑ Ingresos: ${currencySymbol}${monthlyIncome.toInt()}",
                     fontSize = 12.sp,
                     color = Color(0xFF1FBF9F),
                     fontWeight = FontWeight.Bold
                 )
 
                 Text(
-                    text = "↓ Gastos: $${totalExpenses.toInt()}",
+                    text = "↓ Gastos: ${currencySymbol}${totalExpenses.toInt()}",
                     fontSize = 12.sp,
                     color = Color(0xFFE11D48),
                     fontWeight = FontWeight.Bold
@@ -335,7 +352,8 @@ fun DailyControlCard(
     dailyBudget: Double,
     spentToday: Double,
     availableToday: Double,
-    savingsToday: Double
+    savingsToday: Double,
+    currencySymbol: String
 ) {
     val progress = if (dailyBudget > 0) {
         (spentToday / dailyBudget).coerceIn(0.0, 1.0).toFloat()
@@ -408,9 +426,9 @@ fun DailyControlCard(
 
             Text(
                 text = if (availableToday >= 0) {
-                    "$${availableToday.toInt()}"
+                    "${currencySymbol}${availableToday.toInt()}"
                 } else {
-                    "$${abs(availableToday.toInt())}"
+                    "${currencySymbol}${abs(availableToday.toInt())}"
                 },
                 fontSize = 34.sp,
                 fontWeight = FontWeight.Bold,
@@ -440,20 +458,20 @@ fun DailyControlCard(
             ) {
                 DailyMiniStat(
                     title = "PRESUPUESTO",
-                    amount = "$${dailyBudget.toInt()}"
+                    amount = "${currencySymbol}${dailyBudget.toInt()}"
                 )
 
                 DailyMiniStat(
                     title = "GASTADO",
-                    amount = "$${spentToday.toInt()}"
+                    amount = "${currencySymbol}${spentToday.toInt()}"
                 )
 
                 DailyMiniStat(
                     title = "AHORRO HOY",
                     amount = if (availableToday >= 0) {
-                        "+$${savingsToday.toInt()}"
+                        "+${currencySymbol}${savingsToday.toInt()}"
                     } else {
-                        "$0"
+                        "${currencySymbol}0"
                     }
                 )
             }
@@ -490,7 +508,8 @@ fun SmartDailyMessage(
     spentToday: Double,
     availableToday: Double,
     savingsToday: Double,
-    totalSavings: Double
+    totalSavings: Double,
+    currencySymbol: String
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -505,9 +524,9 @@ fun SmartDailyMessage(
     ) {
         Text(
             text = if (spentToday == 0.0) {
-                "👍 Empieza el día sin gastos. Tu ahorro acumulado es $${totalSavings.toInt()}."
+                "👍 Empieza el día sin gastos. Tu ahorro acumulado es ${currencySymbol}${totalSavings.toInt()}."
             } else if (availableToday >= 0) {
-                "💪 Buen trabajo. Hoy ahorrarías $${savingsToday.toInt()}. Ahorro acumulado: $${totalSavings.toInt()}."
+                "💪 Buen trabajo. Hoy ahorrarías ${currencySymbol}${savingsToday.toInt()}. Ahorro acumulado: ${currencySymbol}${totalSavings.toInt()}."
             } else {
                 "⚠️ Te excediste hoy. No se agregará ahorro automático a tu meta."
             },

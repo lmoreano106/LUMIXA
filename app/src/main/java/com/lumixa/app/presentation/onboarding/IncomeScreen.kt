@@ -24,7 +24,8 @@ import com.lumixa.app.presentation.viewmodel.IncomeViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
+import androidx.compose.ui.platform.LocalContext
+import com.lumixa.app.data.preferences.CurrencyPreferences
 @Composable
 fun IncomeScreen(
     incomeViewModel: IncomeViewModel,
@@ -43,7 +44,11 @@ fun IncomeScreen(
     }
 
     val dailyBudget = if (monthlyIncome > 0) monthlyIncome / 30 else 0.0
+    val context = LocalContext.current
 
+    val currencyPreferences = remember {
+        CurrencyPreferences(context)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -136,7 +141,7 @@ fun IncomeScreen(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
-                    text = "$${dailyBudget.toInt()}",
+                    text = "${currencyPreferences.getCurrencySymbol()}${dailyBudget.toInt()}",
                     fontSize = 34.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White

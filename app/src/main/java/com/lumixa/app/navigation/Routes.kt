@@ -15,4 +15,5 @@ sealed class Routes(val route: String) {
     data object AddIncome : Routes("add_income")
     data object CreateGoal : Routes("create_goal")
     object GoalDetail : Routes("goal_detail")
+    object EditGoal : Routes("edit_goal")
 }

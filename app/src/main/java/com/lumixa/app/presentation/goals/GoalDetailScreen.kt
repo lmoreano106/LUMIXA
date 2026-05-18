@@ -24,19 +24,31 @@ import java.util.Date
 import java.util.Locale
 import kotlin.math.ceil
 import kotlin.math.max
-
+import androidx.compose.foundation.clickable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import com.lumixa.app.data.preferences.CurrencyPreferences
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 @Composable
 fun GoalDetailScreen(
     goalViewModel: GoalViewModel,
     savingsViewModel: SavingsViewModel,
-    onBackClick: () -> Unit
-) {
+    onBackClick: () -> Unit,
+    onEditClick: () -> Unit
+)  {
     val goals by goalViewModel.goals.collectAsState()
     val savings by savingsViewModel.savings.collectAsState()
 
     val goal = goals.firstOrNull()
     val totalSavings = savings.sumOf { it.amount }
+    val context = LocalContext.current
 
+    val currencyPreferences = remember {
+        CurrencyPreferences(context)
+    }
+
+    val currencySymbol = currencyPreferences.getCurrencySymbol()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -51,9 +63,16 @@ fun GoalDetailScreen(
         item {
             Text(
                 text = "← Volver",
+
+                modifier = Modifier
+                    .clickable {
+                        onBackClick()
+                    }
+                    .padding(bottom = 18.dp),
+
                 fontSize = 13.sp,
-                color = Color(0xFF6B7280),
-                modifier = Modifier.padding(bottom = 18.dp)
+
+                color = Color(0xFF6B7280)
             )
 
             Text(
@@ -107,7 +126,8 @@ fun GoalDetailScreen(
                     progress = progress,
                     savedAmount = totalSavings,
                     targetAmount = goal.targetAmount,
-                    remainingAmount = remainingAmount
+                    remainingAmount = remainingAmount,
+                    currencySymbol = currencySymbol
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -123,7 +143,17 @@ fun GoalDetailScreen(
                 SmartGoalRecommendationCard(
                     status = status,
                     remainingAmount = remainingAmount,
-                    recommendedDailySaving = recommendedDailySaving
+                    recommendedDailySaving = recommendedDailySaving,
+                    currencySymbol = currencySymbol
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                GoalActionsCard(
+                    onEditClick = onEditClick,
+                    onDeleteClick = {
+                        goalViewModel.deleteGoal(goal.id)
+                        onBackClick()
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -150,7 +180,8 @@ fun GoalDetailScreen(
                 items(savings.sortedByDescending { it.id }) { saving ->
                     SavingHistoryItem(
                         date = saving.date,
-                        amount = saving.amount
+                        amount = saving.amount,
+                        currencySymbol = currencySymbol
                     )
                 }
             }
@@ -182,8 +213,9 @@ fun GoalProgressDetailCard(
     progress: Float,
     savedAmount: Double,
     targetAmount: Double,
-    remainingAmount: Double
-) {
+    remainingAmount: Double,
+    currencySymbol: String
+){
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -228,17 +260,17 @@ fun GoalProgressDetailCard(
 
             DetailMoneyRow(
                 title = "Ahorrado",
-                amount = "$${savedAmount.toInt()}"
+                amount = "${currencySymbol}${savedAmount.toInt()}"
             )
 
             DetailMoneyRow(
                 title = "Meta",
-                amount = "$${targetAmount.toInt()}"
+                amount = "${currencySymbol}${targetAmount.toInt()}"
             )
 
             DetailMoneyRow(
                 title = "Faltante",
-                amount = "$${remainingAmount.toInt()}"
+                amount = "${currencySymbol}${remainingAmount.toInt()}"
             )
         }
     }
@@ -317,7 +349,8 @@ fun GoalTimeCard(
 fun SmartGoalRecommendationCard(
     status: String,
     remainingAmount: Double,
-    recommendedDailySaving: Int
+    recommendedDailySaving: Int,
+    currencySymbol: String
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -344,13 +377,13 @@ fun SmartGoalRecommendationCard(
                         "Excelente. Ya alcanzaste esta meta financiera."
 
                     "Meta vencida" ->
-                        "La fecha límite pasó y aún faltan $${remainingAmount.toInt()}. Puedes ampliar la fecha o aumentar tu ahorro diario."
+                        "La fecha límite pasó y aún faltan ${currencySymbol}${remainingAmount.toInt()}. Puedes ampliar la fecha o aumentar tu ahorro diario."
 
                     "Último día" ->
-                        "Hoy es el último día. Para completar la meta necesitas ahorrar $${remainingAmount.toInt()}."
+                        "Hoy es el último día. Para completar la meta necesitas ahorrar ${currencySymbol}${remainingAmount.toInt()}."
 
                     else ->
-                        "Para llegar a tiempo, deberías ahorrar aproximadamente $${recommendedDailySaving} por día."
+                        "Para llegar a tiempo, deberías ahorrar aproximadamente ${currencySymbol}${recommendedDailySaving} por día."
                 }
 
             Text(
@@ -366,7 +399,8 @@ fun SmartGoalRecommendationCard(
 @Composable
 fun SavingHistoryItem(
     date: String,
-    amount: Double
+    amount: Double,
+    currencySymbol: String
 ) {
     Card(
         modifier = Modifier
@@ -392,7 +426,7 @@ fun SavingHistoryItem(
             )
 
             Text(
-                text = "+$${amount.toInt()}",
+                text = "+${currencySymbol}${amount.toInt()}",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF1FBF9F)
@@ -400,7 +434,69 @@ fun SavingHistoryItem(
         }
     }
 }
+@Composable
+fun GoalActionsCard(
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
+            Text(
+                text = "Acciones de meta",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF0F2A44)
+            )
 
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Button(
+                onClick = onEditClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF2D6CDF)
+                )
+            ) {
+                Text(
+                    text = "Editar meta",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+            Button(
+                onClick = onDeleteClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE11D48)
+                )
+            ) {
+                Text(
+                    text = "Eliminar meta",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+        }
+    }
+}
 fun calculateDaysLeft(
     targetDate: String
 ): Int {

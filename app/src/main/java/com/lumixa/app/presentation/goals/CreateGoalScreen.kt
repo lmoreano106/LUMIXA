@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lumixa.app.data.local.entity.GoalEntity
 import com.lumixa.app.presentation.viewmodel.GoalViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -33,29 +34,53 @@ import java.util.Locale
 fun CreateGoalScreen(
     goalViewModel: GoalViewModel,
     onSaveClick: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    existingGoal: GoalEntity? = null
 ) {
-    var goalName by remember { mutableStateOf("") }
-    var targetAmount by remember { mutableStateOf("") }
-    var targetDate by remember { mutableStateOf("") }
-    var showDatePicker by remember { mutableStateOf(false) }
+
+    var goalName by remember {
+        mutableStateOf(existingGoal?.name ?: "")
+    }
+
+    var targetAmount by remember {
+        mutableStateOf(
+            existingGoal?.targetAmount?.toInt()?.toString() ?: ""
+        )
+    }
+
+    var targetDate by remember {
+        mutableStateOf(existingGoal?.targetDate ?: "")
+    }
+
+    var showDatePicker by remember {
+        mutableStateOf(false)
+    }
 
     val datePickerState = rememberDatePickerState()
 
+    val isEditing = existingGoal != null
+
     if (showDatePicker) {
+
         DatePickerDialog(
             onDismissRequest = {
                 showDatePicker = false
             },
+
             confirmButton = {
+
                 TextButton(
                     onClick = {
+
                         datePickerState.selectedDateMillis?.let { millis ->
+
                             val formatter = SimpleDateFormat(
                                 "dd/MM/yyyy",
                                 Locale.getDefault()
                             )
-                            targetDate = formatter.format(Date(millis))
+
+                            targetDate =
+                                formatter.format(Date(millis))
                         }
 
                         showDatePicker = false
@@ -64,7 +89,9 @@ fun CreateGoalScreen(
                     Text("Aceptar")
                 }
             },
+
             dismissButton = {
+
                 TextButton(
                     onClick = {
                         showDatePicker = false
@@ -73,7 +100,9 @@ fun CreateGoalScreen(
                     Text("Cancelar")
                 }
             }
+
         ) {
+
             DatePicker(
                 state = datePickerState
             )
@@ -86,10 +115,14 @@ fun CreateGoalScreen(
             .background(Color(0xFFF4F6F8))
             .padding(horizontal = 28.dp, vertical = 34.dp)
     ) {
+
         Text(
             text = "← Volver",
+
             fontSize = 13.sp,
+
             color = Color(0xFF6B7280),
+
             modifier = Modifier.clickable {
                 onBackClick()
             }
@@ -98,18 +131,32 @@ fun CreateGoalScreen(
         Spacer(modifier = Modifier.height(22.dp))
 
         Text(
-            text = "Crear meta",
+            text = if (isEditing) {
+                "Editar meta"
+            } else {
+                "Crear meta"
+            },
+
             fontSize = 28.sp,
+
             fontWeight = FontWeight.Bold,
+
             color = Color(0xFF0F2A44)
         )
 
         Spacer(modifier = Modifier.height(6.dp))
 
         Text(
-            text = "Define una meta financiera y LUMIXA calculará cuánto debes ahorrar.",
+            text = if (isEditing) {
+                "Actualiza tu objetivo financiero."
+            } else {
+                "Define una meta financiera y LUMIXA calculará cuánto debes ahorrar."
+            },
+
             fontSize = 13.sp,
+
             lineHeight = 19.sp,
+
             color = Color(0xFF6B7280)
         )
 
@@ -117,10 +164,13 @@ fun CreateGoalScreen(
 
         GoalTextField(
             label = "NOMBRE DE LA META",
+
             value = goalName,
+
             onValueChange = {
                 goalName = it
             },
+
             placeholder = "Ejemplo: Laptop para estudios"
         )
 
@@ -128,11 +178,16 @@ fun CreateGoalScreen(
 
         GoalTextField(
             label = "MONTO OBJETIVO",
+
             value = targetAmount,
+
             onValueChange = { value ->
-                targetAmount = value.filter { it.isDigit() }
+                targetAmount =
+                    value.filter { it.isDigit() }
             },
+
             placeholder = "Ejemplo: 190000",
+
             keyboardType = KeyboardType.Number
         )
 
@@ -140,8 +195,11 @@ fun CreateGoalScreen(
 
         Text(
             text = "FECHA LÍMITE",
+
             fontSize = 11.sp,
+
             fontWeight = FontWeight.Bold,
+
             color = Color(0xFF6B7280)
         )
 
@@ -153,22 +211,29 @@ fun CreateGoalScreen(
                 .clickable {
                     showDatePicker = true
                 },
+
             shape = RoundedCornerShape(14.dp),
+
             colors = CardDefaults.cardColors(
                 containerColor = Color.White
             ),
+
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 1.dp
             )
         ) {
+
             Text(
                 text = if (targetDate.isNotBlank()) {
                     targetDate
                 } else {
                     "Seleccionar fecha límite"
                 },
+
                 modifier = Modifier.padding(18.dp),
+
                 fontSize = 14.sp,
+
                 color = if (targetDate.isNotBlank()) {
                     Color(0xFF0F2A44)
                 } else {
@@ -179,59 +244,68 @@ fun CreateGoalScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color(0xFFEAF1FF)
-            )
-        ) {
-            Column(
-                modifier = Modifier.padding(18.dp)
-            ) {
-                Text(
-                    text = "Recomendación inteligente",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF0F2A44)
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Al guardar tu meta, LUMIXA la mostrará en el inicio y calculará tu progreso financiero.",
-                    fontSize = 13.sp,
-                    lineHeight = 19.sp,
-                    color = Color(0xFF6B7280)
-                )
-            }
-        }
-
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
             onClick = {
-                goalViewModel.addGoal(
-                    name = if (goalName.isNotBlank()) goalName else "Meta sin nombre",
-                    targetAmount = targetAmount.toDoubleOrNull() ?: 0.0,
-                    savedAmount = 0.0,
-                    targetDate = if (targetDate.isNotBlank()) targetDate else "Sin fecha"
-                )
+
+                if (isEditing && existingGoal != null) {
+
+                    goalViewModel.updateGoal(
+                        existingGoal.copy(
+                            name = goalName,
+                            targetAmount = targetAmount.toDoubleOrNull() ?: 0.0,
+                            targetDate = targetDate
+                        )
+                    )
+
+                } else {
+
+                    goalViewModel.addGoal(
+                        name = if (goalName.isNotBlank()) {
+                            goalName
+                        } else {
+                            "Meta sin nombre"
+                        },
+
+                        targetAmount =
+                            targetAmount.toDoubleOrNull() ?: 0.0,
+
+                        savedAmount = 0.0,
+
+                        targetDate = if (targetDate.isNotBlank()) {
+                            targetDate
+                        } else {
+                            "Sin fecha"
+                        }
+                    )
+                }
 
                 onSaveClick()
             },
+
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
+
             shape = RoundedCornerShape(16.dp),
+
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF2D6CDF)
             )
         ) {
+
             Text(
-                text = "Guardar meta",
+                text = if (isEditing) {
+                    "Guardar cambios"
+                } else {
+                    "Guardar meta"
+                },
+
                 fontSize = 16.sp,
+
                 fontWeight = FontWeight.Bold,
+
                 color = Color.White
             )
         }
@@ -246,10 +320,14 @@ fun GoalTextField(
     placeholder: String,
     keyboardType: KeyboardType = KeyboardType.Text
 ) {
+
     Text(
         text = label,
+
         fontSize = 11.sp,
+
         fontWeight = FontWeight.Bold,
+
         color = Color(0xFF6B7280)
     )
 
@@ -257,13 +335,19 @@ fun GoalTextField(
 
     OutlinedTextField(
         value = value,
+
         onValueChange = onValueChange,
+
         modifier = Modifier.fillMaxWidth(),
+
         placeholder = {
             Text(placeholder)
         },
+
         singleLine = true,
+
         shape = RoundedCornerShape(14.dp),
+
         keyboardOptions = KeyboardOptions(
             keyboardType = keyboardType
         )
