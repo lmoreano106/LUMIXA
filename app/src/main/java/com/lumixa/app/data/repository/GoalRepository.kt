@@ -15,7 +15,8 @@ class GoalRepository(
         goal: GoalEntity
     ) {
         val insertedId = goalDao.insertGoal(goal).toInt()
-        val goalWithId = goal.copy(id = insertedId)
+        val currentUserId = firebaseAuth.currentUser?.uid ?: goal.userId
+        val goalWithId = goal.copy(id = insertedId, userId = currentUserId)
 
         firestoreRepository.upsertGoal(
             userId = goalWithId.userId,
@@ -31,8 +32,9 @@ class GoalRepository(
         goal: GoalEntity
     ) {
         goalDao.updateGoal(goal)
+        val currentUserId = firebaseAuth.currentUser?.uid ?: goal.userId
         firestoreRepository.upsertGoal(
-            userId = goal.userId,
+            userId = currentUserId,
             goalId = goal.id,
             name = goal.name,
             targetAmount = goal.targetAmount,

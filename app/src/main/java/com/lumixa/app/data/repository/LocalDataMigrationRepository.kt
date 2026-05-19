@@ -29,11 +29,9 @@ class LocalDataMigrationRepository(
     }
 
     private suspend fun migrateExpenses(userId: String) {
-        val existingIds = firestoreRepository.getDocumentIds(userId, "expenses")
         val localExpenses = expenseDao.getAllExpenses(userId).first()
 
         localExpenses
-            .filter { expense -> !existingIds.contains(expense.id.toString()) }
             .forEach { expense ->
                 firestoreRepository.upsertExpense(
                     userId = userId,
@@ -49,11 +47,9 @@ class LocalDataMigrationRepository(
     }
 
     private suspend fun migrateIncomes(userId: String) {
-        val existingIds = firestoreRepository.getDocumentIds(userId, "incomes")
         val localIncomes = incomeDao.getAllIncomes(userId).first()
 
         localIncomes
-            .filter { income -> !existingIds.contains(income.id.toString()) }
             .forEach { income ->
                 firestoreRepository.upsertIncome(
                     userId = userId,
@@ -68,11 +64,9 @@ class LocalDataMigrationRepository(
     }
 
     private suspend fun migrateGoals(userId: String) {
-        val existingIds = firestoreRepository.getDocumentIds(userId, "goals")
         val localGoals = goalDao.getAllGoals(userId).first()
 
         localGoals
-            .filter { goal -> !existingIds.contains(goal.id.toString()) }
             .forEach { goal ->
                 firestoreRepository.upsertGoal(
                     userId = userId,
@@ -86,11 +80,9 @@ class LocalDataMigrationRepository(
     }
 
     private suspend fun migrateSavings(userId: String) {
-        val existingIds = firestoreRepository.getDocumentIds(userId, "savings")
         val localSavings = savingsDao.getAllSavings(userId).first()
 
         localSavings
-            .filter { saving -> !existingIds.contains(saving.id.toString()) }
             .forEach { saving ->
                 firestoreRepository.upsertSaving(
                     userId = userId,

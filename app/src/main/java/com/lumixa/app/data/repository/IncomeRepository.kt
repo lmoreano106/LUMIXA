@@ -2,11 +2,13 @@ package com.lumixa.app.data.repository
 
 import com.lumixa.app.data.local.dao.IncomeDao
 import com.lumixa.app.data.local.entity.IncomeEntity
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.Flow
 
 class IncomeRepository(
     private val incomeDao: IncomeDao,
-    private val firestoreRepository: FirestoreRepository
+    private val firestoreRepository: FirestoreRepository,
+    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
 ) {
 
     suspend fun insertIncome(
@@ -14,14 +16,17 @@ class IncomeRepository(
     ) {
         val insertedId = incomeDao.insertIncome(income).toInt()
 
+        val currentUserId = firebaseAuth.currentUser?.uid ?: income.userId
+        val incomeWithId = income.copy(id = insertedId, userId = currentUserId)
+
         firestoreRepository.upsertIncome(
-            userId = income.userId,
-            incomeId = insertedId,
-            amount = income.amount,
-            type = income.type,
-            description = income.description,
-            date = income.date,
-            time = income.time
+            userId = currentUserId,
+            incomeId = incomeWithId.id,
+            amount = incomeWithId.amount,
+            type = incomeWithId.type,
+            description = incomeWithId.description,
+            date = incomeWithId.date,
+            time = incomeWithId.time
         )
     }
 
@@ -42,8 +47,9 @@ class IncomeRepository(
             incomeId = incomeId
         )
 
+        val currentUserId = firebaseAuth.currentUser?.uid ?: userId
         firestoreRepository.deleteIncome(
-            userId = userId,
+            userId = currentUserId,
             incomeId = incomeId
         )
     }

@@ -2,11 +2,13 @@ package com.lumixa.app.data.repository
 
 import com.lumixa.app.data.local.dao.SavingsDao
 import com.lumixa.app.data.local.entity.SavingsEntity
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.Flow
 
 class SavingsRepository(
     private val savingsDao: SavingsDao,
-    private val firestoreRepository: FirestoreRepository
+    private val firestoreRepository: FirestoreRepository,
+    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
 ) {
 
     suspend fun insertSaving(
@@ -14,11 +16,14 @@ class SavingsRepository(
     ) {
         val insertedId = savingsDao.insertSaving(saving).toInt()
 
+        val currentUserId = firebaseAuth.currentUser?.uid ?: saving.userId
+        val savingWithId = saving.copy(id = insertedId, userId = currentUserId)
+
         firestoreRepository.upsertSaving(
-            userId = saving.userId,
-            savingId = insertedId,
-            amount = saving.amount,
-            date = saving.date
+            userId = currentUserId,
+            savingId = savingWithId.id,
+            amount = savingWithId.amount,
+            date = savingWithId.date
         )
     }
 
@@ -68,8 +73,9 @@ class SavingsRepository(
         )
 
         if (updatedSaving != null) {
+            val currentUserId = firebaseAuth.currentUser?.uid ?: userId
             firestoreRepository.upsertSaving(
-                userId = userId,
+                userId = currentUserId,
                 savingId = updatedSaving.id,
                 amount = updatedSaving.amount,
                 date = updatedSaving.date
@@ -85,8 +91,9 @@ class SavingsRepository(
             savingId = savingId
         )
 
+        val currentUserId = firebaseAuth.currentUser?.uid ?: userId
         firestoreRepository.deleteSaving(
-            userId = userId,
+            userId = currentUserId,
             savingId = savingId
         )
     }
