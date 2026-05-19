@@ -1,6 +1,7 @@
 package com.lumixa.app.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -10,6 +11,7 @@ import com.lumixa.app.data.provider.DatabaseProvider
 import com.lumixa.app.data.repository.ExpenseRepository
 import com.lumixa.app.data.repository.FirestoreRepository
 import com.lumixa.app.data.repository.IncomeRepository
+import com.lumixa.app.data.repository.LocalDataMigrationRepository
 import com.lumixa.app.presentation.auth.login.LoginScreen
 import com.lumixa.app.presentation.auth.register.RegisterScreen
 import com.lumixa.app.presentation.dashboard.AddIncomeScreen
@@ -33,6 +35,7 @@ import com.lumixa.app.data.repository.AuthRepository
 import com.lumixa.app.presentation.viewmodel.AuthViewModel
 import com.lumixa.app.presentation.viewmodel.AuthViewModelFactory
 import com.lumixa.app.presentation.goals.GoalDetailScreen
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AppNavigation() {
@@ -46,9 +49,11 @@ fun AppNavigation() {
     )
     val database = DatabaseProvider.getDatabase(context)
 
+    val firestoreRepository = FirestoreRepository()
+
     val expenseRepository = ExpenseRepository(
         expenseDao = database.expenseDao(),
-        firestoreRepository = FirestoreRepository()
+        firestoreRepository = firestoreRepository
     )
 
     val expenseViewModel: ExpenseViewModel = viewModel(
@@ -57,7 +62,7 @@ fun AppNavigation() {
 
     val incomeRepository = IncomeRepository(
         incomeDao = database.incomeDao(),
-        firestoreRepository = FirestoreRepository()
+        firestoreRepository = firestoreRepository
     )
 
     val incomeViewModel: IncomeViewModel = viewModel(
@@ -65,7 +70,7 @@ fun AppNavigation() {
     )
     val goalRepository = GoalRepository(
         goalDao = database.goalDao(),
-        firestoreRepository = FirestoreRepository()
+        firestoreRepository = firestoreRepository
     )
 
     val goalViewModel: GoalViewModel = viewModel(
@@ -73,11 +78,18 @@ fun AppNavigation() {
     )
     val savingsRepository = SavingsRepository(
         savingsDao = database.savingsDao(),
-        firestoreRepository = FirestoreRepository()
+        firestoreRepository = firestoreRepository
     )
 
     val savingsViewModel: SavingsViewModel = viewModel(
         factory = SavingsViewModelFactory(savingsRepository)
+    )
+    val migrationRepository = LocalDataMigrationRepository(
+        expenseDao = database.expenseDao(),
+        incomeDao = database.incomeDao(),
+        goalDao = database.goalDao(),
+        savingsDao = database.savingsDao(),
+        firestoreRepository = firestoreRepository
     )
     NavHost(
         navController = navController,
@@ -162,6 +174,14 @@ fun AppNavigation() {
         }
 
         composable(Routes.Dashboard.route) {
+            val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+            LaunchedEffect(userId) {
+                if (!userId.isNullOrBlank()) {
+                    migrationRepository.migrateCurrentUserDataToFirestore()
+                }
+            }
+
             MainScreen(
                 goalViewModel = goalViewModel,
 
