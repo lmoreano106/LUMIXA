@@ -81,7 +81,11 @@ class ExpenseViewModel(
 
     fun deleteExpense(id: Int) {
         viewModelScope.launch {
-            repository.deleteExpense(id)
+            val userId = getCurrentUserId()
+
+            if (userId.isNotBlank()) {
+                repository.deleteExpense(userId = userId, expenseId = id)
+            }
             refreshExpenses()
         }
     }
