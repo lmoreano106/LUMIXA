@@ -45,10 +45,10 @@ fun AppNavigation() {
         factory = AuthViewModelFactory(authRepository)
     )
     val database = DatabaseProvider.getDatabase(context)
-
+    val firestoreRepository = FirestoreRepository()
     val expenseRepository = ExpenseRepository(
         expenseDao = database.expenseDao(),
-        firestoreRepository = FirestoreRepository()
+        firestoreRepository = firestoreRepository
     )
 
     val expenseViewModel: ExpenseViewModel = viewModel(
@@ -57,7 +57,7 @@ fun AppNavigation() {
 
     val incomeRepository = IncomeRepository(
         incomeDao = database.incomeDao(),
-        firestoreRepository = FirestoreRepository()
+        firestoreRepository = firestoreRepository
     )
 
     val incomeViewModel: IncomeViewModel = viewModel(
@@ -65,7 +65,7 @@ fun AppNavigation() {
     )
     val goalRepository = GoalRepository(
         goalDao = database.goalDao(),
-        firestoreRepository = FirestoreRepository()
+        firestoreRepository = firestoreRepository
     )
 
     val goalViewModel: GoalViewModel = viewModel(
@@ -73,7 +73,7 @@ fun AppNavigation() {
     )
     val savingsRepository = SavingsRepository(
         savingsDao = database.savingsDao(),
-        firestoreRepository = FirestoreRepository()
+        firestoreRepository = firestoreRepository
     )
 
     val savingsViewModel: SavingsViewModel = viewModel(
