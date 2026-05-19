@@ -5,13 +5,24 @@ import com.lumixa.app.data.local.entity.IncomeEntity
 import kotlinx.coroutines.flow.Flow
 
 class IncomeRepository(
-    private val incomeDao: IncomeDao
+    private val incomeDao: IncomeDao,
+    private val firestoreRepository: FirestoreRepository
 ) {
 
     suspend fun insertIncome(
         income: IncomeEntity
     ) {
-        incomeDao.insertIncome(income)
+        val insertedId = incomeDao.insertIncome(income).toInt()
+
+        firestoreRepository.upsertIncome(
+            userId = income.userId,
+            incomeId = insertedId,
+            amount = income.amount,
+            type = income.type,
+            description = income.description,
+            date = income.date,
+            time = income.time
+        )
     }
 
     fun getAllIncomes(
@@ -24,9 +35,15 @@ class IncomeRepository(
     }
 
     suspend fun deleteIncome(
+        userId: String,
         incomeId: Int
     ) {
         incomeDao.deleteIncome(
+            incomeId = incomeId
+        )
+
+        firestoreRepository.deleteIncome(
+            userId = userId,
             incomeId = incomeId
         )
     }

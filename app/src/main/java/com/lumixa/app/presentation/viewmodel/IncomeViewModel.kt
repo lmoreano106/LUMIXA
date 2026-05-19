@@ -79,8 +79,15 @@ class IncomeViewModel(
 
     fun deleteIncome(id: Int) {
         viewModelScope.launch {
-            repository.deleteIncome(id)
-            refreshIncomes()
+            val userId = getCurrentUserId()
+
+            if (userId.isNotBlank()) {
+                repository.deleteIncome(
+                    userId = userId,
+                    incomeId = id
+                )
+                refreshIncomes()
+            }
         }
     }
 
