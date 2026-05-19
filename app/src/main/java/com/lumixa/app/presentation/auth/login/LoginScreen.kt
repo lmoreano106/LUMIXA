@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lumixa.app.R
+import com.lumixa.app.data.preferences.CurrencyPreferences
 import com.lumixa.app.presentation.viewmodel.AuthViewModel
 
 @Composable
@@ -37,6 +38,8 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val currencyPreferences = remember { CurrencyPreferences(context) }
 
     val isLoading by authViewModel.isLoading.collectAsState()
     val authError by authViewModel.authError.collectAsState()
@@ -175,6 +178,8 @@ fun LoginScreen(
                     authViewModel.login(
                         email = email.trim(),
                         password = password,
+                        currencyCode = currencyPreferences.getCurrencyCode(),
+                        currencySymbol = currencyPreferences.getCurrencySymbol(),
                         onSuccess = onLoginClick
                     )
                 }

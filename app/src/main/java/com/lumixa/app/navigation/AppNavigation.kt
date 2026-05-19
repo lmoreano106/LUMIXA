@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.lumixa.app.data.provider.DatabaseProvider
+import com.lumixa.app.data.preferences.CurrencyPreferences
 import com.lumixa.app.data.repository.ExpenseRepository
 import com.lumixa.app.data.repository.FirestoreRepository
 import com.lumixa.app.data.repository.IncomeRepository
@@ -43,6 +44,7 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val context = LocalContext.current
     val authRepository = AuthRepository()
+    val currencyPreferences = CurrencyPreferences(context)
 
     val authViewModel: AuthViewModel = viewModel(
         factory = AuthViewModelFactory(authRepository)
@@ -91,6 +93,16 @@ fun AppNavigation() {
         savingsDao = database.savingsDao(),
         firestoreRepository = firestoreRepository
     )
+
+    LaunchedEffect(Unit) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (!userId.isNullOrBlank()) {
+            authViewModel.syncCurrentUserProfile(
+                currencyCode = currencyPreferences.getCurrencyCode(),
+                currencySymbol = currencyPreferences.getCurrencySymbol()
+            )
+        }
+    }
     NavHost(
         navController = navController,
         startDestination = Routes.Onboarding.route

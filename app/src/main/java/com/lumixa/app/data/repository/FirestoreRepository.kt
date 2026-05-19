@@ -25,30 +25,19 @@ class FirestoreRepository(
         currencySymbol: String?,
         currencyCode: String?
     ) {
-        val profileData = mutableMapOf<String, Any>(
-            "uid" to uid
+        val resolvedUserId = resolveUserId(userId)
+        val profileData = mapOf(
+            "uid" to uid,
+            "email" to (email ?: ""),
+            "displayName" to (displayName ?: ""),
+            "currencySymbol" to (currencySymbol ?: "$"),
+            "currencyCode" to (currencyCode ?: "COP")
         )
-
-        if (!email.isNullOrBlank()) {
-            profileData["email"] = email
-        }
-
-        if (!displayName.isNullOrBlank()) {
-            profileData["displayName"] = displayName
-        }
-
-        if (!currencySymbol.isNullOrBlank()) {
-            profileData["currencySymbol"] = currencySymbol
-        }
-
-        if (!currencyCode.isNullOrBlank()) {
-            profileData["currencyCode"] = currencyCode
-        }
 
         suspendCoroutine<Unit> { continuation ->
             firestore
                 .collection("users")
-                .document(userId)
+                .document(resolvedUserId)
                 .collection("profile")
                 .document("main")
                 .set(profileData)
@@ -159,10 +148,12 @@ class FirestoreRepository(
         userId: String,
         incomeId: Int
     ) {
+        val resolvedUserId = resolveUserId(userId)
+
         suspendCoroutine<Unit> { continuation ->
             firestore
                 .collection("users")
-                .document(userId)
+                .document(resolvedUserId)
                 .collection("incomes")
                 .document(incomeId.toString())
                 .delete()
@@ -265,10 +256,12 @@ class FirestoreRepository(
         userId: String,
         savingId: Int
     ) {
+        val resolvedUserId = resolveUserId(userId)
+
         suspendCoroutine<Unit> { continuation ->
             firestore
                 .collection("users")
-                .document(userId)
+                .document(resolvedUserId)
                 .collection("savings")
                 .document(savingId.toString())
                 .delete()

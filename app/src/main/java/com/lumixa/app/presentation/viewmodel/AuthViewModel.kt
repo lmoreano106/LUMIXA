@@ -22,6 +22,8 @@ class AuthViewModel(
         email: String,
         password: String,
         fullName: String,
+        currencyCode: String,
+        currencySymbol: String,
         onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
@@ -31,7 +33,9 @@ class AuthViewModel(
             val result = repository.register(
                 email = email,
                 password = password,
-                fullName = fullName
+                fullName = fullName,
+                currencyCode = currencyCode,
+                currencySymbol = currencySymbol
             )
 
             _isLoading.value = false
@@ -49,6 +53,8 @@ class AuthViewModel(
     fun login(
         email: String,
         password: String,
+        currencyCode: String,
+        currencySymbol: String,
         onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
@@ -58,7 +64,9 @@ class AuthViewModel(
 
             val result = repository.login(
                 email = email,
-                password = password
+                password = password,
+                currencyCode = currencyCode,
+                currencySymbol = currencySymbol
             )
 
             _isLoading.value = false
@@ -82,6 +90,18 @@ class AuthViewModel(
 
     fun isUserLoggedIn(): Boolean {
         return repository.isUserLoggedIn()
+    }
+
+    fun syncCurrentUserProfile(
+        currencyCode: String,
+        currencySymbol: String
+    ) {
+        viewModelScope.launch {
+            repository.syncCurrentUserProfile(
+                currencyCode = currencyCode,
+                currencySymbol = currencySymbol
+            )
+        }
     }
 
     private fun getSpanishAuthError(

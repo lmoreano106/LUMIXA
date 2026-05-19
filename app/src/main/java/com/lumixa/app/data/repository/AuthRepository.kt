@@ -11,7 +11,9 @@ class AuthRepository(
     suspend fun register(
         email: String,
         password: String,
-        fullName: String
+        fullName: String,
+        currencyCode: String = "COP",
+        currencySymbol: String = "$"
     ): Result<Unit> {
         return try {
             val result = firebaseAuth
@@ -23,7 +25,10 @@ class AuthRepository(
             }
 
             result.user?.updateProfile(profileUpdates)?.await()
-            syncUserProfile()
+            syncUserProfile(
+                currencyCode = currencyCode,
+                currencySymbol = currencySymbol
+            )
 
             Result.success(Unit)
         } catch (e: Exception) {
@@ -33,14 +38,19 @@ class AuthRepository(
 
     suspend fun login(
         email: String,
-        password: String
+        password: String,
+        currencyCode: String = "COP",
+        currencySymbol: String = "$"
     ): Result<Unit> {
         return try {
             firebaseAuth
                 .signInWithEmailAndPassword(email, password)
                 .await()
 
-            syncUserProfile()
+            syncUserProfile(
+                currencyCode = currencyCode,
+                currencySymbol = currencySymbol
+            )
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -55,7 +65,17 @@ class AuthRepository(
         return firebaseAuth.currentUser != null
     }
 
-    private suspend fun syncUserProfile() {
+    suspend fun syncCurrentUserProfile(
+        currencyCode: String = "COP",
+        currencySymbol: String = "$"
+    ) {
+        syncUserProfile(currencyCode = currencyCode, currencySymbol = currencySymbol)
+    }
+
+    private suspend fun syncUserProfile(
+        currencyCode: String,
+        currencySymbol: String
+    ) {
         val user = firebaseAuth.currentUser ?: return
 
         firestoreRepository.upsertUserProfile(
@@ -63,8 +83,8 @@ class AuthRepository(
             uid = user.uid,
             email = user.email,
             displayName = user.displayName,
-            currencySymbol = null,
-            currencyCode = null
+            currencySymbol = currencySymbol,
+            currencyCode = currencyCode
         )
     }
 }
