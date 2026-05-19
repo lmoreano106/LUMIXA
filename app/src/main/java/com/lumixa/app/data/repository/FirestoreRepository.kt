@@ -1,14 +1,21 @@
 package com.lumixa.app.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuth
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.tasks.await
 
 class FirestoreRepository(
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) {
+    private fun resolveUserId(
+        userId: String
+    ): String {
+        return auth.currentUser?.uid ?: userId
+    }
 
     suspend fun upsertUserProfile(
         userId: String,
@@ -130,10 +137,12 @@ class FirestoreRepository(
             "time" to time
         )
 
+        val resolvedUserId = resolveUserId(userId)
+
         suspendCoroutine<Unit> { continuation ->
             firestore
                 .collection("users")
-                .document(userId)
+                .document(resolvedUserId)
                 .collection("incomes")
                 .document(incomeId.toString())
                 .set(incomeData)
@@ -183,10 +192,12 @@ class FirestoreRepository(
             "targetDate" to targetDate
         )
 
+        val resolvedUserId = resolveUserId(userId)
+
         suspendCoroutine<Unit> { continuation ->
             firestore
                 .collection("users")
-                .document(userId)
+                .document(resolvedUserId)
                 .collection("goals")
                 .document(goalId.toString())
                 .set(goalData)
@@ -232,10 +243,12 @@ class FirestoreRepository(
             "date" to date
         )
 
+        val resolvedUserId = resolveUserId(userId)
+
         suspendCoroutine<Unit> { continuation ->
             firestore
                 .collection("users")
-                .document(userId)
+                .document(resolvedUserId)
                 .collection("savings")
                 .document(savingId.toString())
                 .set(savingData)

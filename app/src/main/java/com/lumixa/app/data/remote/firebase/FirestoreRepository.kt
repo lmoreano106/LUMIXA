@@ -72,14 +72,16 @@ class FirestoreRepository(
         if (uid.isBlank()) return
 
         userDocument()
-            .collection("settings")
-            .document("currency")
+            .collection("profile")
+            .document("main")
             .set(
                 mapOf(
                     "code" to code,
                     "name" to name,
-                    "symbol" to symbol
-                )
+                    "symbol" to symbol,
+                    "uid" to uid
+                ),
+                com.google.firebase.firestore.SetOptions.merge()
             )
             .await()
     }
@@ -92,12 +94,15 @@ class FirestoreRepository(
         if (uid.isBlank()) return
 
         userDocument()
+            .collection("profile")
+            .document("main")
             .set(
                 mapOf(
-                    "userId" to uid,
+                    "uid" to uid,
                     "username" to username,
                     "email" to email
-                )
+                ),
+                com.google.firebase.firestore.SetOptions.merge()
             )
             .await()
     }
