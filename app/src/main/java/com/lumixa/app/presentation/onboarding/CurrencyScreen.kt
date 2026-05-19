@@ -22,6 +22,9 @@ import androidx.compose.ui.unit.sp
 
 import androidx.compose.ui.platform.LocalContext
 import com.lumixa.app.data.preferences.CurrencyPreferences
+import com.google.firebase.auth.FirebaseAuth
+import com.lumixa.app.data.repository.FirestoreRepository
+import kotlinx.coroutines.launch
 
 @Composable
 fun CurrencyScreen(
@@ -33,6 +36,10 @@ fun CurrencyScreen(
     val currencyPreferences = remember {
         CurrencyPreferences(context)
     }
+    val firestoreRepository = remember {
+        FirestoreRepository()
+    }
+    val coroutineScope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -101,22 +108,44 @@ fun CurrencyScreen(
         Button(
             onClick = {
 
+                var selectedCode = "COP"
+                var selectedName = "Pesos colombianos"
+                var selectedSymbol = "$"
+
                 when (selectedCurrency) {
 
                     "COP" -> {
-                        currencyPreferences.saveCurrency(
-                            code = "COP",
-                            name = "Pesos colombianos",
-                            symbol = "$"
-                        )
+                        selectedCode = "COP"
+                        selectedName = "Pesos colombianos"
+                        selectedSymbol = "$"
                     }
 
                     "PEN" -> {
-                        currencyPreferences.saveCurrency(
-                            code = "PEN",
-                            name = "Soles peruanos",
-                            symbol = "S/"
-                        )
+                        selectedCode = "PEN"
+                        selectedName = "Soles peruanos"
+                        selectedSymbol = "S/"
+                    }
+                }
+
+                currencyPreferences.saveCurrency(
+                    code = selectedCode,
+                    name = selectedName,
+                    symbol = selectedSymbol
+                )
+
+                val currentUser = FirebaseAuth.getInstance().currentUser
+                if (currentUser != null) {
+                    coroutineScope.launch {
+                        runCatching {
+                            firestoreRepository.upsertUserProfile(
+                                userId = currentUser.uid,
+                                uid = currentUser.uid,
+                                email = currentUser.email,
+                                displayName = currentUser.displayName,
+                                currencySymbol = selectedSymbol,
+                                currencyCode = selectedCode
+                            )
+                        }
                     }
                 }
 

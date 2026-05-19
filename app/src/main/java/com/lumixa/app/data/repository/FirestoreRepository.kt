@@ -9,6 +9,50 @@ class FirestoreRepository(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) {
 
+    suspend fun upsertUserProfile(
+        userId: String,
+        uid: String,
+        email: String?,
+        displayName: String?,
+        currencySymbol: String?,
+        currencyCode: String?
+    ) {
+        val profileData = mutableMapOf<String, Any>(
+            "uid" to uid
+        )
+
+        if (!email.isNullOrBlank()) {
+            profileData["email"] = email
+        }
+
+        if (!displayName.isNullOrBlank()) {
+            profileData["displayName"] = displayName
+        }
+
+        if (!currencySymbol.isNullOrBlank()) {
+            profileData["currencySymbol"] = currencySymbol
+        }
+
+        if (!currencyCode.isNullOrBlank()) {
+            profileData["currencyCode"] = currencyCode
+        }
+
+        suspendCoroutine<Unit> { continuation ->
+            firestore
+                .collection("users")
+                .document(userId)
+                .collection("profile")
+                .document("main")
+                .set(profileData)
+                .addOnSuccessListener {
+                    continuation.resume(Unit)
+                }
+                .addOnFailureListener { exception ->
+                    continuation.resumeWithException(exception)
+                }
+        }
+    }
+
     suspend fun upsertExpense(
         userId: String,
         expenseId: Int,
