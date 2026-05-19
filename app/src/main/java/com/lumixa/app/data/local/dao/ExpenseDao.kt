@@ -13,7 +13,7 @@ interface ExpenseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertExpense(
         expense: ExpenseEntity
-    )
+    ): Long
 
     @Query(
         "SELECT * FROM expenses WHERE userId = :userId ORDER BY id DESC"
