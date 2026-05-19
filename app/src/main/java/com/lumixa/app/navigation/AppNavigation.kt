@@ -33,7 +33,9 @@ import com.lumixa.app.data.repository.AuthRepository
 import com.lumixa.app.presentation.viewmodel.AuthViewModel
 import com.lumixa.app.presentation.viewmodel.AuthViewModelFactory
 import com.lumixa.app.presentation.goals.GoalDetailScreen
-
+import androidx.compose.runtime.LaunchedEffect
+import com.google.firebase.auth.FirebaseAuth
+import com.lumixa.app.data.repository.LocalDataMigrationRepository
 @Composable
 fun AppNavigation() {
 
@@ -78,6 +80,13 @@ fun AppNavigation() {
 
     val savingsViewModel: SavingsViewModel = viewModel(
         factory = SavingsViewModelFactory(savingsRepository)
+    )
+    val migrationRepository = LocalDataMigrationRepository(
+        expenseDao = database.expenseDao(),
+        incomeDao = database.incomeDao(),
+        goalDao = database.goalDao(),
+        savingsDao = database.savingsDao(),
+        firestoreRepository = firestoreRepository
     )
     NavHost(
         navController = navController,
@@ -162,6 +171,14 @@ fun AppNavigation() {
         }
 
         composable(Routes.Dashboard.route) {
+            val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+            LaunchedEffect(userId) {
+                if (!userId.isNullOrBlank()) {
+                    migrationRepository.migrateCurrentUserDataToFirestore()
+                }
+            }
+
             MainScreen(
                 goalViewModel = goalViewModel,
 
