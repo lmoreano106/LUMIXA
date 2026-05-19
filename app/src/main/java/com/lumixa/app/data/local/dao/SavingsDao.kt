@@ -13,7 +13,7 @@ interface SavingsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSaving(
         saving: SavingsEntity
-    )
+    ): Long
 
     @Query(
         "SELECT * FROM savings WHERE userId = :userId ORDER BY id DESC"
@@ -44,5 +44,12 @@ interface SavingsDao {
         userId: String,
         amount: Double,
         date: String
+    )
+
+    @Query(
+        "DELETE FROM savings WHERE id = :savingId"
+    )
+    suspend fun deleteSavingById(
+        savingId: Int
     )
 }

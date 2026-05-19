@@ -173,4 +173,53 @@ class FirestoreRepository(
                 }
         }
     }
+
+    suspend fun upsertSaving(
+        userId: String,
+        savingId: Int,
+        amount: Double,
+        date: String
+    ) {
+        val savingData = mapOf(
+            "id" to savingId,
+            "userId" to userId,
+            "amount" to amount,
+            "date" to date
+        )
+
+        suspendCoroutine<Unit> { continuation ->
+            firestore
+                .collection("users")
+                .document(userId)
+                .collection("savings")
+                .document(savingId.toString())
+                .set(savingData)
+                .addOnSuccessListener {
+                    continuation.resume(Unit)
+                }
+                .addOnFailureListener { exception ->
+                    continuation.resumeWithException(exception)
+                }
+        }
+    }
+
+    suspend fun deleteSaving(
+        userId: String,
+        savingId: Int
+    ) {
+        suspendCoroutine<Unit> { continuation ->
+            firestore
+                .collection("users")
+                .document(userId)
+                .collection("savings")
+                .document(savingId.toString())
+                .delete()
+                .addOnSuccessListener {
+                    continuation.resume(Unit)
+                }
+                .addOnFailureListener { exception ->
+                    continuation.resumeWithException(exception)
+                }
+        }
+    }
 }

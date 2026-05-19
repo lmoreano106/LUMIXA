@@ -72,7 +72,8 @@ fun AppNavigation() {
         factory = GoalViewModelFactory(goalRepository)
     )
     val savingsRepository = SavingsRepository(
-        savingsDao = database.savingsDao()
+        savingsDao = database.savingsDao(),
+        firestoreRepository = FirestoreRepository()
     )
 
     val savingsViewModel: SavingsViewModel = viewModel(

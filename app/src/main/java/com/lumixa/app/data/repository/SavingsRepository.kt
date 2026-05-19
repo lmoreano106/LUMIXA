@@ -5,13 +5,21 @@ import com.lumixa.app.data.local.entity.SavingsEntity
 import kotlinx.coroutines.flow.Flow
 
 class SavingsRepository(
-    private val savingsDao: SavingsDao
+    private val savingsDao: SavingsDao,
+    private val firestoreRepository: FirestoreRepository
 ) {
 
     suspend fun insertSaving(
         saving: SavingsEntity
     ) {
-        savingsDao.insertSaving(saving)
+        val insertedId = savingsDao.insertSaving(saving).toInt()
+
+        firestoreRepository.upsertSaving(
+            userId = saving.userId,
+            savingId = insertedId,
+            amount = saving.amount,
+            date = saving.date
+        )
     }
 
     fun getAllSavings(
@@ -48,11 +56,38 @@ class SavingsRepository(
         amount: Double,
         date: String
     ) {
-
         savingsDao.updateSavingByDate(
             userId = userId,
             amount = amount,
             date = date
+        )
+
+        val updatedSaving = savingsDao.getSavingByDate(
+            userId = userId,
+            date = date
+        )
+
+        if (updatedSaving != null) {
+            firestoreRepository.upsertSaving(
+                userId = userId,
+                savingId = updatedSaving.id,
+                amount = updatedSaving.amount,
+                date = updatedSaving.date
+            )
+        }
+    }
+
+    suspend fun deleteSaving(
+        userId: String,
+        savingId: Int
+    ) {
+        savingsDao.deleteSavingById(
+            savingId = savingId
+        )
+
+        firestoreRepository.deleteSaving(
+            userId = userId,
+            savingId = savingId
         )
     }
 }
