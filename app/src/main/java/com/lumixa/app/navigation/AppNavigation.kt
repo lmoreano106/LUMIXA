@@ -64,7 +64,8 @@ fun AppNavigation() {
         factory = IncomeViewModelFactory(incomeRepository)
     )
     val goalRepository = GoalRepository(
-        goalDao = database.goalDao()
+        goalDao = database.goalDao(),
+        firestoreRepository = FirestoreRepository()
     )
 
     val goalViewModel: GoalViewModel = viewModel(
