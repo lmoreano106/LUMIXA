@@ -6,6 +6,7 @@ import com.lumixa.app.data.local.dao.GoalDao
 import com.lumixa.app.data.local.dao.IncomeDao
 import com.lumixa.app.data.local.dao.SavingsDao
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.supervisorScope
 
 class LocalDataMigrationRepository(
     private val expenseDao: ExpenseDao,
@@ -16,13 +17,15 @@ class LocalDataMigrationRepository(
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
 ) {
 
-    suspend fun migrateCurrentUserDataToFirestore() {
-        val userId = firebaseAuth.currentUser?.uid ?: return
+    suspend fun migrateCurrentUserDataToFirestore() = supervisorScope {
+        val userId = firebaseAuth.currentUser?.uid
 
-        migrateExpenses(userId)
-        migrateIncomes(userId)
-        migrateGoals(userId)
-        migrateSavings(userId)
+        if (userId.isNullOrBlank()) return@supervisorScope
+
+        runCatching { migrateExpenses(userId) }
+        runCatching { migrateIncomes(userId) }
+        runCatching { migrateGoals(userId) }
+        runCatching { migrateSavings(userId) }
     }
 
     private suspend fun migrateExpenses(userId: String) {
