@@ -65,4 +65,59 @@ class FirestoreRepository(
                 }
         }
     }
+
+    suspend fun upsertIncome(
+        userId: String,
+        incomeId: Int,
+        amount: Double,
+        type: String,
+        description: String,
+        date: String,
+        time: String
+    ) {
+        val incomeData = mapOf(
+            "id" to incomeId,
+            "userId" to userId,
+            "amount" to amount,
+            "type" to type,
+            "description" to description,
+            "date" to date,
+            "time" to time
+        )
+
+        suspendCoroutine<Unit> { continuation ->
+            firestore
+                .collection("users")
+                .document(userId)
+                .collection("incomes")
+                .document(incomeId.toString())
+                .set(incomeData)
+                .addOnSuccessListener {
+                    continuation.resume(Unit)
+                }
+                .addOnFailureListener { exception ->
+                    continuation.resumeWithException(exception)
+                }
+        }
+    }
+
+    suspend fun deleteIncome(
+        userId: String,
+        incomeId: Int
+    ) {
+        suspendCoroutine<Unit> { continuation ->
+            firestore
+                .collection("users")
+                .document(userId)
+                .collection("incomes")
+                .document(incomeId.toString())
+                .delete()
+                .addOnSuccessListener {
+                    continuation.resume(Unit)
+                }
+                .addOnFailureListener { exception ->
+                    continuation.resumeWithException(exception)
+                }
+        }
+    }
 }

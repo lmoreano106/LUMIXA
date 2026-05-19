@@ -56,7 +56,8 @@ fun AppNavigation() {
     )
 
     val incomeRepository = IncomeRepository(
-        incomeDao = database.incomeDao()
+        incomeDao = database.incomeDao(),
+        firestoreRepository = FirestoreRepository()
     )
 
     val incomeViewModel: IncomeViewModel = viewModel(

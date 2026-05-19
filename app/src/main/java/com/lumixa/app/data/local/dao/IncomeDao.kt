@@ -13,7 +13,7 @@ interface IncomeDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertIncome(
         income: IncomeEntity
-    )
+    ): Long
 
     @Query(
         "SELECT * FROM incomes WHERE userId = :userId ORDER BY id DESC"
