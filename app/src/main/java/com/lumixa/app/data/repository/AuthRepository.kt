@@ -4,7 +4,8 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.tasks.await
 import com.google.firebase.auth.userProfileChangeRequest
 class AuthRepository(
-    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(),
+    private val firestoreRepository: FirestoreRepository = FirestoreRepository()
 ) {
 
     suspend fun register(
@@ -22,6 +23,7 @@ class AuthRepository(
             }
 
             result.user?.updateProfile(profileUpdates)?.await()
+            syncUserProfile()
 
             Result.success(Unit)
         } catch (e: Exception) {
@@ -38,6 +40,7 @@ class AuthRepository(
                 .signInWithEmailAndPassword(email, password)
                 .await()
 
+            syncUserProfile()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -50,5 +53,18 @@ class AuthRepository(
 
     fun isUserLoggedIn(): Boolean {
         return firebaseAuth.currentUser != null
+    }
+
+    private suspend fun syncUserProfile() {
+        val user = firebaseAuth.currentUser ?: return
+
+        firestoreRepository.upsertUserProfile(
+            userId = user.uid,
+            uid = user.uid,
+            email = user.email,
+            displayName = user.displayName,
+            currencySymbol = null,
+            currencyCode = null
+        )
     }
 }
