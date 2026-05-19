@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.lumixa.app.data.provider.DatabaseProvider
 import com.lumixa.app.data.repository.ExpenseRepository
+import com.lumixa.app.data.repository.FirestoreRepository
 import com.lumixa.app.data.repository.IncomeRepository
 import com.lumixa.app.presentation.auth.login.LoginScreen
 import com.lumixa.app.presentation.auth.register.RegisterScreen
@@ -46,7 +47,8 @@ fun AppNavigation() {
     val database = DatabaseProvider.getDatabase(context)
 
     val expenseRepository = ExpenseRepository(
-        expenseDao = database.expenseDao()
+        expenseDao = database.expenseDao(),
+        firestoreRepository = FirestoreRepository()
     )
 
     val expenseViewModel: ExpenseViewModel = viewModel(
