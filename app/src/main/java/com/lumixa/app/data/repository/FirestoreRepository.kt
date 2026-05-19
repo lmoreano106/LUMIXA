@@ -4,6 +4,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.tasks.await
 
 class FirestoreRepository(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -265,5 +266,21 @@ class FirestoreRepository(
                     continuation.resumeWithException(exception)
                 }
         }
+    }
+
+    suspend fun getDocumentIds(
+        userId: String,
+        collection: String
+    ): Set<String> {
+        val snapshot = firestore
+            .collection("users")
+            .document(userId)
+            .collection(collection)
+            .get()
+            .await()
+
+        return snapshot.documents
+            .map { document -> document.id }
+            .toSet()
     }
 }
