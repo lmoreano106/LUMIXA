@@ -120,4 +120,57 @@ class FirestoreRepository(
                 }
         }
     }
+
+    suspend fun upsertGoal(
+        userId: String,
+        goalId: Int,
+        name: String,
+        targetAmount: Double,
+        savedAmount: Double,
+        targetDate: String
+    ) {
+        val goalData = mapOf(
+            "id" to goalId,
+            "userId" to userId,
+            "name" to name,
+            "targetAmount" to targetAmount,
+            "savedAmount" to savedAmount,
+            "targetDate" to targetDate
+        )
+
+        suspendCoroutine<Unit> { continuation ->
+            firestore
+                .collection("users")
+                .document(userId)
+                .collection("goals")
+                .document(goalId.toString())
+                .set(goalData)
+                .addOnSuccessListener {
+                    continuation.resume(Unit)
+                }
+                .addOnFailureListener { exception ->
+                    continuation.resumeWithException(exception)
+                }
+        }
+    }
+
+    suspend fun deleteGoal(
+        userId: String,
+        goalId: Int
+    ) {
+        suspendCoroutine<Unit> { continuation ->
+            firestore
+                .collection("users")
+                .document(userId)
+                .collection("goals")
+                .document(goalId.toString())
+                .delete()
+                .addOnSuccessListener {
+                    continuation.resume(Unit)
+                }
+                .addOnFailureListener { exception ->
+                    continuation.resumeWithException(exception)
+                }
+        }
+    }
 }

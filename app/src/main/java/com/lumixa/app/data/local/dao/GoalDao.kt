@@ -14,7 +14,7 @@ interface GoalDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertGoal(
         goal: GoalEntity
-    )
+    ): Long
 
     @Update
     suspend fun updateGoal(
