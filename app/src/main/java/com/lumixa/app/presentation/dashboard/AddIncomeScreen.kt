@@ -9,10 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.widget.Toast
 import com.lumixa.app.presentation.viewmodel.IncomeViewModel
 
 @Composable
@@ -21,9 +23,11 @@ fun AddIncomeScreen(
     onSaveClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
+    val context = LocalContext.current
     var amount by remember { mutableStateOf("") }
     var incomeType by remember { mutableStateOf("Ingreso extra") }
     var description by remember { mutableStateOf("") }
+    var amountError by remember { mutableStateOf<String?>(null) }
 
     val incomeTypes = listOf("Ingreso extra", "Sueldo", "Regalo", "Otro")
 
@@ -65,13 +69,20 @@ fun AddIncomeScreen(
 
         OutlinedTextField(
             value = amount,
-            onValueChange = { amount = it.filter { char -> char.isDigit() } },
+            onValueChange = {
+                amount = it.filter { char -> char.isDigit() }
+                amountError = null
+            },
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text("Ejemplo: 50000") },
             singleLine = true,
             shape = RoundedCornerShape(14.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
+        amountError?.let {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(text = it, fontSize = 12.sp, color = Color(0xFFE11D48))
+        }
 
         Spacer(modifier = Modifier.height(22.dp))
 
@@ -114,8 +125,15 @@ fun AddIncomeScreen(
 
         Button(
             onClick = {
+                val amountValue = amount.toDoubleOrNull() ?: 0.0
+                if (amount.isBlank() || amountValue <= 0.0) {
+                    amountError = "Ingresa un monto mayor a 0."
+                    Toast.makeText(context, "No se pudo guardar el ingreso", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+
                 incomeViewModel.addIncome(
-                    amount = amount.toDoubleOrNull() ?: 0.0,
+                    amount = amountValue,
                     type = incomeType,
                     description = if (description.isNotBlank()) description else "Sin descripción",
                     date = "14 mayo 2026",

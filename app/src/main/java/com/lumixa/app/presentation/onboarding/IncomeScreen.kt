@@ -26,6 +26,7 @@ import java.util.Date
 import java.util.Locale
 import androidx.compose.ui.platform.LocalContext
 import com.lumixa.app.data.preferences.CurrencyPreferences
+import android.widget.Toast
 @Composable
 fun IncomeScreen(
     incomeViewModel: IncomeViewModel,
@@ -33,6 +34,7 @@ fun IncomeScreen(
 ) {
     var income by remember { mutableStateOf("") }
     var frequency by remember { mutableStateOf("Mensual") }
+    var incomeError by remember { mutableStateOf<String?>(null) }
 
     val incomeValue = income.toDoubleOrNull() ?: 0.0
 
@@ -101,6 +103,7 @@ fun IncomeScreen(
             value = income,
             onValueChange = { value ->
                 income = value.filter { it.isDigit() }
+                incomeError = null
             },
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text("Ejemplo: 1130000") },
@@ -110,6 +113,11 @@ fun IncomeScreen(
                 keyboardType = KeyboardType.Number
             )
         )
+
+        incomeError?.let {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(text = it, fontSize = 12.sp, color = Color(0xFFE11D48))
+        }
 
         Spacer(modifier = Modifier.height(26.dp))
 
@@ -162,6 +170,11 @@ fun IncomeScreen(
 
         Button(
             onClick = {
+                if (income.isBlank() || monthlyIncome <= 0.0) {
+                    incomeError = "Ingresa un monto válido mayor a 0."
+                    Toast.makeText(context, "Completa el ingreso para continuar", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
                 val dateFormat = SimpleDateFormat(
                     "dd MMMM yyyy",
                     Locale("es", "ES")
@@ -182,7 +195,6 @@ fun IncomeScreen(
 
                 onContinueClick()
             },
-            enabled = monthlyIncome > 0,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),

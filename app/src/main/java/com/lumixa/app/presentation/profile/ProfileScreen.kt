@@ -18,14 +18,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
@@ -94,6 +91,7 @@ fun ProfileScreen(
         ?: availableCurrencies.first()
 
     var isSaving by rememberSaveable { mutableStateOf(false) }
+    var nameError by rememberSaveable { mutableStateOf<String?>(null) }
 
     val username = editableName.ifBlank { "Usuario" }
     val email = user?.email ?: "Sin correo"
@@ -155,11 +153,7 @@ fun ProfileScreen(
                             color = Color(0xFF2B2B2B)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Editar avatar",
-                            tint = Color(0xFF1FBF9F)
-                        )
+                        Text(text = "✎", fontSize = 14.sp, color = Color(0xFF1FBF9F))
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
@@ -185,12 +179,20 @@ fun ProfileScreen(
 
             OutlinedTextField(
                 value = editableName,
-                onValueChange = { editableName = it },
+                onValueChange = {
+                    editableName = it
+                    nameError = null
+                },
                 label = { Text("Nombre") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isSaving
             )
+
+            nameError?.let {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(text = it, fontSize = 12.sp, color = Color(0xFFE11D48))
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -265,7 +267,12 @@ fun ProfileScreen(
                         val selected = availableCurrencies.first { it.code == selectedCurrencyCode }
                         runCatching {
                             val cleanName = editableName.trim()
-                            if (cleanName.isNotBlank() && cleanName != user.displayName) {
+                            if (cleanName.isBlank()) {
+                                nameError = "El nombre no puede estar vacío."
+                                throw IllegalArgumentException("Nombre vacío")
+                            }
+
+                            if (cleanName != user.displayName) {
                                 val profileUpdates = UserProfileChangeRequest.Builder()
                                     .setDisplayName(cleanName)
                                     .build()
@@ -289,7 +296,11 @@ fun ProfileScreen(
                         }.onSuccess {
                             snackbarHostState.showSnackbar("Cambios guardados correctamente")
                         }.onFailure {
-                            snackbarHostState.showSnackbar("Error al guardar cambios")
+                            if (nameError == null) {
+                                snackbarHostState.showSnackbar("Error al guardar cambios")
+                            } else {
+                                snackbarHostState.showSnackbar("Corrige el nombre para continuar")
+                            }
                         }
                         isSaving = false
                     }
