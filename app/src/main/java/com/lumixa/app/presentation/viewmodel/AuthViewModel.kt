@@ -18,6 +18,9 @@ class AuthViewModel(
     private val _authError = MutableStateFlow<String?>(null)
     val authError: StateFlow<String?> = _authError.asStateFlow()
 
+    private val _resetPasswordMessage = MutableStateFlow<String?>(null)
+    val resetPasswordMessage: StateFlow<String?> = _resetPasswordMessage.asStateFlow()
+
     fun register(
         email: String,
         password: String,
@@ -106,8 +109,48 @@ class AuthViewModel(
         repository.logout()
     }
 
+    fun sendPasswordResetEmail(email: String) {
+        val trimmedEmail = email.trim()
+
+        when {
+            trimmedEmail.isBlank() -> {
+                _resetPasswordMessage.value = "Ingresa tu correo electrónico."
+                return
+            }
+
+            !isEmailValid(trimmedEmail) -> {
+                _resetPasswordMessage.value = "Ingresa un correo electrónico válido."
+                return
+            }
+        }
+
+        viewModelScope.launch {
+            _isLoading.value = true
+            _authError.value = null
+            _resetPasswordMessage.value = null
+
+            val result = repository.sendPasswordResetEmail(trimmedEmail)
+
+            _isLoading.value = false
+
+            _resetPasswordMessage.value = if (result.isSuccess) {
+                "Correo de recuperación enviado. Revisa tu bandeja de entrada."
+            } else {
+                "No se pudo enviar el correo de recuperación."
+            }
+        }
+    }
+
+    fun clearResetPasswordMessage() {
+        _resetPasswordMessage.value = null
+    }
+
     fun isUserLoggedIn(): Boolean {
         return repository.isUserLoggedIn()
+    }
+
+    private fun isEmailValid(email: String): Boolean {
+        return Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$").matches(email)
     }
 
     private fun getSpanishAuthError(
