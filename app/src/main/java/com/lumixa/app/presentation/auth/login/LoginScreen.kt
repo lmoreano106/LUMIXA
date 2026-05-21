@@ -29,7 +29,8 @@ import com.lumixa.app.presentation.viewmodel.AuthViewModel
 @Composable
 fun LoginScreen(
     authViewModel: AuthViewModel,
-    onLoginClick: () -> Unit,
+    onUserLoginClick: () -> Unit,
+    onAdminLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onBackToHomeClick: () -> Unit
 ) {
@@ -170,12 +171,16 @@ fun LoginScreen(
         Button(
             onClick = {
                 if (isAdminMode) {
-                    onLoginClick()
+                    authViewModel.loginAdmin(
+                        email = email.trim(),
+                        password = password,
+                        onSuccess = onAdminLoginClick
+                    )
                 } else {
                     authViewModel.login(
                         email = email.trim(),
                         password = password,
-                        onSuccess = onLoginClick
+                        onSuccess = onUserLoginClick
                     )
                 }
             },

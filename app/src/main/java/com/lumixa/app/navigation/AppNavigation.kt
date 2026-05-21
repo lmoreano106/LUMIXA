@@ -105,13 +105,21 @@ fun AppNavigation() {
         composable(Routes.Login.route) {
             LoginScreen(
                 authViewModel = authViewModel,
-                onLoginClick = {
+                onUserLoginClick = {
                     incomeViewModel.refreshIncomes()
                     expenseViewModel.refreshExpenses()
                     goalViewModel.refreshGoals()
                     savingsViewModel.refreshSavings()
 
                     navController.navigate(Routes.Dashboard.route) {
+                        popUpTo(Routes.Onboarding.route) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                },
+                onAdminLoginClick = {
+                    navController.navigate(Routes.Admin.route) {
                         popUpTo(Routes.Onboarding.route) {
                             inclusive = true
                         }

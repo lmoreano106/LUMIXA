@@ -76,6 +76,32 @@ class AuthViewModel(
         }
     }
 
+    fun loginAdmin(
+        email: String,
+        password: String,
+        onSuccess: () -> Unit
+    ) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _authError.value = null
+
+            val result = repository.loginAdmin(
+                email = email,
+                password = password
+            )
+
+            _isLoading.value = false
+
+            if (result.isSuccess) {
+                onSuccess()
+            } else {
+                _authError.value = getSpanishAuthError(
+                    result.exceptionOrNull()
+                )
+            }
+        }
+    }
+
     fun logout() {
         repository.logout()
     }
@@ -132,6 +158,13 @@ class AuthViewModel(
                 ignoreCase = true
             ) -> {
                 "Error de conexión. Revisa tu internet."
+            }
+
+            message.contains(
+                "acceso no autorizado",
+                ignoreCase = true
+            ) -> {
+                "Acceso no autorizado para administrador."
             }
 
             else -> {
