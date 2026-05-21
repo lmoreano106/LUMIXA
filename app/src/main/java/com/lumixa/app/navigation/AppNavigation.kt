@@ -209,10 +209,6 @@ fun AppNavigation() {
                         navController.navigate(Routes.GoalDetail.route)
                     }
                 },
-
-                onAdminClick = {
-                    navController.navigate(Routes.Admin.route)
-                },
                 onLogoutClick = {
 
                     authViewModel.logout()
@@ -301,7 +297,19 @@ fun AppNavigation() {
         composable(Routes.Statistics.route) {}
         composable(Routes.Admin.route) {
             AdminScreen(
-                onBackClick = { navController.popBackStack() }
+                onLogoutClick = {
+                    authViewModel.logout()
+
+                    incomeViewModel.clearData()
+                    expenseViewModel.clearData()
+                    goalViewModel.clearData()
+                    savingsViewModel.clearData()
+
+                    navController.navigate(Routes.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
             )
         }
     }

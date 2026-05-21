@@ -33,7 +33,7 @@ import com.lumixa.app.presentation.viewmodel.AdminViewModel
 
 @Composable
 fun AdminScreen(
-    onBackClick: () -> Unit,
+    onLogoutClick: () -> Unit,
     adminViewModel: AdminViewModel = viewModel()
 ) {
     val uiState by adminViewModel.uiState.collectAsState()
@@ -50,7 +50,7 @@ fun AdminScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("⛔ Acceso no autorizado", fontSize = 22.sp, color = Color(0xFF0F2A44), fontWeight = FontWeight.Bold)
                     Text(uiState.errorMessage ?: "Solo administradores pueden ver este panel.", color = Color(0xFF2B2B2B))
-                    Button(onClick = onBackClick, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D6CDF))) {
+                    Button(onClick = onLogoutClick, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D6CDF))) {
                         Text("Volver", color = Color.White)
                     }
                 }
@@ -79,10 +79,10 @@ fun AdminScreen(
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
                             Button(
-                                onClick = onBackClick,
+                                onClick = onLogoutClick,
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1FBF9F)),
                                 modifier = Modifier.fillMaxWidth()
-                            ) { Text("Volver al perfil", color = Color.White) }
+                            ) { Text("Cerrar sesión", color = Color.White) }
                         }
                     }
                 }
