@@ -10,6 +10,7 @@ import com.lumixa.app.data.provider.DatabaseProvider
 import com.lumixa.app.data.repository.ExpenseRepository
 import com.lumixa.app.data.repository.FirestoreRepository
 import com.lumixa.app.data.repository.IncomeRepository
+import com.lumixa.app.presentation.admin.AdminScreen
 import com.lumixa.app.presentation.auth.login.LoginScreen
 import com.lumixa.app.presentation.auth.register.RegisterScreen
 import com.lumixa.app.presentation.dashboard.AddIncomeScreen
@@ -201,6 +202,9 @@ fun AppNavigation() {
                     }
                 },
 
+                onAdminClick = {
+                    navController.navigate(Routes.Admin.route)
+                },
                 onLogoutClick = {
 
                     authViewModel.logout()
@@ -287,6 +291,10 @@ fun AppNavigation() {
         }
         composable(Routes.Expenses.route) {}
         composable(Routes.Statistics.route) {}
-        composable(Routes.Admin.route) {}
+        composable(Routes.Admin.route) {
+            AdminScreen(
+                onBackClick = { navController.popBackStack() }
+            )
+        }
     }
 }

@@ -25,6 +25,7 @@ fun MainScreen(
     onAddIncomeClick: () -> Unit,
     onGoalClick: () -> Unit,
     onLogoutClick: () -> Unit,
+    onAdminClick: () -> Unit,
     savingsViewModel: SavingsViewModel
 ) {
 
@@ -119,7 +120,8 @@ fun MainScreen(
             )
 
             3 -> ProfileScreen(
-                onLogoutClick = onLogoutClick
+                onLogoutClick = onLogoutClick,
+                onAdminClick = onAdminClick
             )
         }
     }
