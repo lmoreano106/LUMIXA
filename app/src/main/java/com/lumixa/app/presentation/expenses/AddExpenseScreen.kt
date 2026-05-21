@@ -15,11 +15,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
+import android.widget.Toast
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -30,10 +32,13 @@ fun AddExpenseScreen(
     onSaveClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
+    val context = LocalContext.current
     var amount by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("Comida") }
     var customCategory by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
+    var amountError by remember { mutableStateOf<String?>(null) }
+    var categoryError by remember { mutableStateOf<String?>(null) }
 
     val categories = listOf("Comida", "Transporte", "Ocio", "Estudios", "Otros")
 
@@ -84,6 +89,7 @@ fun AddExpenseScreen(
             value = amount,
             onValueChange = { value ->
                 amount = value.filter { it.isDigit() }
+                amountError = null
             },
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text("Ejemplo: 23000") },
@@ -93,6 +99,11 @@ fun AddExpenseScreen(
                 keyboardType = KeyboardType.Number
             )
         )
+
+        amountError?.let {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(text = it, fontSize = 12.sp, color = Color(0xFFE11D48))
+        }
 
         Spacer(modifier = Modifier.height(22.dp))
 
@@ -137,12 +148,20 @@ fun AddExpenseScreen(
 
             OutlinedTextField(
                 value = customCategory,
-                onValueChange = { customCategory = it },
+                onValueChange = {
+                    customCategory = it
+                    categoryError = null
+                },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Nombre de la categoría") },
                 singleLine = true,
                 shape = RoundedCornerShape(14.dp)
             )
+
+            categoryError?.let {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(text = it, fontSize = 12.sp, color = Color(0xFFE11D48))
+            }
         }
 
         Spacer(modifier = Modifier.height(22.dp))
@@ -170,6 +189,24 @@ fun AddExpenseScreen(
 
         Button(
             onClick = {
+                val amountValue = amount.toDoubleOrNull() ?: 0.0
+                var hasError = false
+
+                if (amount.isBlank() || amountValue <= 0.0) {
+                    amountError = "Ingresa un monto mayor a 0."
+                    hasError = true
+                }
+
+                if (selectedCategory == "Otros" && customCategory.isBlank()) {
+                    categoryError = "Escribe una categoría personalizada."
+                    hasError = true
+                }
+
+                if (hasError) {
+                    Toast.makeText(context, "Revisa los datos antes de guardar", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+
                 val finalCategory =
                     if (selectedCategory == "Otros" && customCategory.isNotBlank()) {
                         customCategory
@@ -196,7 +233,7 @@ fun AddExpenseScreen(
                 expenseViewModel.addExpense(
                     category = finalCategory,
                     description = finalDescription,
-                    amount = amount.toDoubleOrNull() ?: 0.0,
+                    amount = amountValue,
                     date = currentDate,
                     time = currentTime,
                     dayOfWeek = currentDayOfWeek

@@ -19,10 +19,12 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.widget.Toast
 import com.lumixa.app.data.local.entity.GoalEntity
 import com.lumixa.app.presentation.viewmodel.GoalViewModel
 import java.text.SimpleDateFormat
@@ -37,6 +39,7 @@ fun CreateGoalScreen(
     onBackClick: () -> Unit,
     existingGoal: GoalEntity? = null
 ) {
+    val context = LocalContext.current
 
     var goalName by remember {
         mutableStateOf(existingGoal?.name ?: "")
@@ -55,6 +58,9 @@ fun CreateGoalScreen(
     var showDatePicker by remember {
         mutableStateOf(false)
     }
+    var goalNameError by remember { mutableStateOf<String?>(null) }
+    var targetAmountError by remember { mutableStateOf<String?>(null) }
+    var targetDateError by remember { mutableStateOf<String?>(null) }
 
     val datePickerState = rememberDatePickerState()
 
@@ -169,10 +175,16 @@ fun CreateGoalScreen(
 
             onValueChange = {
                 goalName = it
+                goalNameError = null
             },
 
             placeholder = "Ejemplo: Laptop para estudios"
         )
+
+        goalNameError?.let {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(text = it, fontSize = 12.sp, color = Color(0xFFE11D48))
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -184,12 +196,18 @@ fun CreateGoalScreen(
             onValueChange = { value ->
                 targetAmount =
                     value.filter { it.isDigit() }
+                targetAmountError = null
             },
 
             placeholder = "Ejemplo: 190000",
 
             keyboardType = KeyboardType.Number
         )
+
+        targetAmountError?.let {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(text = it, fontSize = 12.sp, color = Color(0xFFE11D48))
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -242,19 +260,54 @@ fun CreateGoalScreen(
             )
         }
 
+        targetDateError?.let {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(text = it, fontSize = 12.sp, color = Color(0xFFE11D48))
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
             onClick = {
+                val amountValue = targetAmount.toDoubleOrNull() ?: 0.0
+                val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).apply { isLenient = false }
+                val parsedDate = runCatching { formatter.parse(targetDate) }.getOrNull()
+                val today = Date()
+
+                goalNameError = null
+                targetAmountError = null
+                targetDateError = null
+
+                var hasError = false
+                if (goalName.isBlank()) {
+                    goalNameError = "El nombre de la meta es obligatorio."
+                    hasError = true
+                }
+                if (targetAmount.isBlank() || amountValue <= 0.0) {
+                    targetAmountError = "El monto objetivo debe ser mayor a 0."
+                    hasError = true
+                }
+                if (targetDate.isBlank()) {
+                    targetDateError = "Selecciona una fecha límite."
+                    hasError = true
+                } else if (parsedDate == null || !parsedDate.after(today)) {
+                    targetDateError = "La fecha límite debe ser futura."
+                    hasError = true
+                }
+
+                if (hasError) {
+                    Toast.makeText(context, "Corrige los campos para guardar la meta", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
 
                 if (isEditing && existingGoal != null) {
 
                     goalViewModel.updateGoal(
                         existingGoal.copy(
                             name = goalName,
-                            targetAmount = targetAmount.toDoubleOrNull() ?: 0.0,
+                            targetAmount = amountValue,
                             targetDate = targetDate
                         )
                     )
@@ -262,22 +315,13 @@ fun CreateGoalScreen(
                 } else {
 
                     goalViewModel.addGoal(
-                        name = if (goalName.isNotBlank()) {
-                            goalName
-                        } else {
-                            "Meta sin nombre"
-                        },
+                        name = goalName,
 
-                        targetAmount =
-                            targetAmount.toDoubleOrNull() ?: 0.0,
+                        targetAmount = amountValue,
 
                         savedAmount = 0.0,
 
-                        targetDate = if (targetDate.isNotBlank()) {
-                            targetDate
-                        } else {
-                            "Sin fecha"
-                        }
+                        targetDate = targetDate
                     )
                 }
 
