@@ -37,6 +37,10 @@ import com.lumixa.app.presentation.goals.GoalDetailScreen
 import androidx.compose.runtime.LaunchedEffect
 import com.google.firebase.auth.FirebaseAuth
 import com.lumixa.app.data.repository.LocalDataMigrationRepository
+import com.lumixa.app.presentation.viewmodel.AiAssistantViewModel
+import com.lumixa.app.presentation.ai.AiAssistantScreen
+import com.lumixa.app.data.repository.AiRepository
+import com.lumixa.app.BuildConfig
 @Composable
 fun AppNavigation() {
 
@@ -82,6 +86,10 @@ fun AppNavigation() {
     val savingsViewModel: SavingsViewModel = viewModel(
         factory = SavingsViewModelFactory(savingsRepository)
     )
+    val aiRepository = AiRepository(BuildConfig.GEMINI_API_KEY)
+
+    val aiAssistantViewModel = AiAssistantViewModel(aiRepository)
+
     val migrationRepository = LocalDataMigrationRepository(
         expenseDao = database.expenseDao(),
         incomeDao = database.incomeDao(),
@@ -209,6 +217,9 @@ fun AppNavigation() {
                         navController.navigate(Routes.GoalDetail.route)
                     }
                 },
+                onAiAssistantClick = {
+                    navController.navigate(Routes.AiAssistant.route)
+                },
                 onLogoutClick = {
 
                     authViewModel.logout()
@@ -297,6 +308,9 @@ fun AppNavigation() {
         composable(Routes.Statistics.route) {}
         composable(Routes.Admin.route) {
             AdminScreen(
+                onAiAssistantClick = {
+                    navController.navigate(Routes.AiAssistant.route)
+                },
                 onLogoutClick = {
                     authViewModel.logout()
 
@@ -310,6 +324,21 @@ fun AppNavigation() {
                         launchSingleTop = true
                     }
                 }
+            )
+        }
+
+        composable(Routes.AiAssistant.route) {
+            val incomes = incomeViewModel.incomes.value
+            val expenses = expenseViewModel.expenses.value
+            val goals = goalViewModel.goals.value
+            val savings = savingsViewModel.savings.value
+
+            AiAssistantScreen(
+                viewModel = aiAssistantViewModel,
+                totalIncome = incomes.sumOf { it.amount },
+                totalExpenses = expenses.sumOf { it.amount },
+                totalSavings = savings.sumOf { it.amount },
+                goals = goals
             )
         }
     }

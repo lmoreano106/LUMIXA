@@ -48,7 +48,8 @@ fun DashboardScreen(
     onAddExpenseClick: () -> Unit = {},
     onAddIncomeClick: () -> Unit = {},
     onGoalClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {}
+    onLogoutClick: () -> Unit = {},
+    onAiAssistantClick: () -> Unit = {}
 ) {
     val expenses by expenseViewModel.expenses.collectAsState()
     val incomes by incomeViewModel.incomes.collectAsState()
@@ -232,6 +233,24 @@ fun DashboardScreen(
                 }
             }
 
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = onAiAssistantClick,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF0F2A44)
+                )
+            ) {
+                Text(
+                    text = "Asistente IA",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
             Spacer(modifier = Modifier.height(18.dp))
 
             GoalCard(
@@ -313,6 +332,24 @@ fun BalanceCard(
                         color = Color(0xFF1FBF9F)
                     )
                 }
+            }
+
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = onAiAssistantClick,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF0F2A44)
+                )
+            ) {
+                Text(
+                    text = "Asistente IA",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
             }
 
             Spacer(modifier = Modifier.height(18.dp))
@@ -411,6 +448,24 @@ fun DailyControlCard(
                         color = Color.White
                     )
                 }
+            }
+
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = onAiAssistantClick,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF0F2A44)
+                )
+            ) {
+                Text(
+                    text = "Asistente IA",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
             }
 
             Spacer(modifier = Modifier.height(18.dp))
