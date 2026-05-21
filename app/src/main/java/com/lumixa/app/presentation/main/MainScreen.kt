@@ -25,6 +25,7 @@ fun MainScreen(
     onAddIncomeClick: () -> Unit,
     onGoalClick: () -> Unit,
     onLogoutClick: () -> Unit,
+    onAiAssistantClick: () -> Unit,
     savingsViewModel: SavingsViewModel
 ) {
 
@@ -105,6 +106,7 @@ fun MainScreen(
                 onAddIncomeClick = onAddIncomeClick,
                 onGoalClick = onGoalClick,
                 onLogoutClick = onLogoutClick,
+                onAiAssistantClick = onAiAssistantClick,
                 savingsViewModel = savingsViewModel
             )
 
