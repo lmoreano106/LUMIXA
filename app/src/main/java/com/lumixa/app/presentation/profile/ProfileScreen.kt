@@ -66,7 +66,8 @@ private data class CurrencyItem(
 
 @Composable
 fun ProfileScreen(
-    onLogoutClick: () -> Unit
+    onLogoutClick: () -> Unit,
+    onAdminClick: () -> Unit
 ) {
     val context = LocalContext.current
     val user = FirebaseAuth.getInstance().currentUser
@@ -321,6 +322,26 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(10.dp))
 
+
+
+            Button(
+                onClick = onAdminClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D6CDF)),
+                enabled = !isSaving
+            ) {
+                Text(
+                    text = "Panel Administrador",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
             Button(
                 onClick = onLogoutClick,
                 modifier = Modifier
