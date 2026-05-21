@@ -21,6 +21,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
+import com.lumixa.app.presentation.components.LumixaColors
 import android.widget.Toast
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -45,7 +46,7 @@ fun AddExpenseScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF4F6F8))
+            .background(LumixaColors.Surface)
             .padding(horizontal = 28.dp, vertical = 34.dp)
     ) {
         Text(

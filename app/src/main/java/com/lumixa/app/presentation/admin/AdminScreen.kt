@@ -29,6 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.lumixa.app.data.repository.AdminUserSummary
+import com.lumixa.app.presentation.components.LumixaColors
+import com.lumixa.app.presentation.components.LumixaEmptyStateCard
+import com.lumixa.app.presentation.components.LumixaLoadingCard
 import com.lumixa.app.presentation.viewmodel.AdminViewModel
 
 @Composable
@@ -41,11 +44,11 @@ fun AdminScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF4F6F8))
-            .padding(16.dp)
+            .background(LumixaColors.Surface)
+            .padding(20.dp)
     ) {
         when {
-            uiState.isLoading -> CircularProgressIndicator(color = Color(0xFF2D6CDF))
+            uiState.isLoading -> LumixaLoadingCard("Cargando panel administrativo")
             !uiState.isAuthorized -> {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("⛔ Acceso no autorizado", fontSize = 22.sp, color = Color(0xFF0F2A44), fontWeight = FontWeight.Bold)
@@ -58,7 +61,7 @@ fun AdminScreen(
             else -> {
                 val data = uiState.dashboardData
                 if (data == null) {
-                    Text("No hay datos disponibles", color = Color(0xFF2B2B2B))
+                    LumixaEmptyStateCard("Sin datos", "No hay datos administrativos disponibles todavía.")
                 } else {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         item { Text("🛡️ Panel Administrador", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F2A44)) }

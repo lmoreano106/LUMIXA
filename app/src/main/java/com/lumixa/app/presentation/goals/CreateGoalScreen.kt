@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.widget.Toast
 import com.lumixa.app.data.local.entity.GoalEntity
+import com.lumixa.app.presentation.components.LumixaColors
 import com.lumixa.app.presentation.viewmodel.GoalViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -118,7 +119,7 @@ fun CreateGoalScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF4F6F8))
+            .background(LumixaColors.Surface)
             .padding(horizontal = 28.dp, vertical = 34.dp)
     ) {
 

@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
 import com.lumixa.app.data.preferences.CurrencyPreferences
+import com.lumixa.app.presentation.components.LumixaColors
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 import com.lumixa.app.presentation.viewmodel.GoalViewModel
 import com.lumixa.app.presentation.viewmodel.IncomeViewModel
@@ -115,7 +116,7 @@ fun DashboardScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFF4F6F8)),
+            .background(LumixaColors.Surface),
         contentPadding = PaddingValues(
             start = 22.dp,
             end = 22.dp,

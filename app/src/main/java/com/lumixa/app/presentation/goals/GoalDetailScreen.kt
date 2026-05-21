@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.lumixa.app.data.preferences.CurrencyPreferences
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import com.lumixa.app.presentation.components.LumixaColors
 @Composable
 fun GoalDetailScreen(
     goalViewModel: GoalViewModel,
@@ -52,7 +53,7 @@ fun GoalDetailScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF4F6F8)),
+            .background(LumixaColors.Surface),
         contentPadding = PaddingValues(
             start = 22.dp,
             end = 22.dp,
