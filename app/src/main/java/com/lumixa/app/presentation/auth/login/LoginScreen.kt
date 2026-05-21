@@ -41,6 +41,7 @@ fun LoginScreen(
 
     val isLoading by authViewModel.isLoading.collectAsState()
     val authError by authViewModel.authError.collectAsState()
+    val resetPasswordMessage by authViewModel.resetPasswordMessage.collectAsState()
 
     Column(
         modifier = Modifier
@@ -97,7 +98,10 @@ fun LoginScreen(
 
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                authViewModel.clearResetPasswordMessage()
+            },
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text("tu@correo.com") },
             singleLine = true,
@@ -161,10 +165,30 @@ fun LoginScreen(
 
         Text(
             text = "¿Olvidaste tu contraseña?",
-            modifier = Modifier.fillMaxWidth(),
-            color = Color(0xFF2D6CDF),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(enabled = !isLoading) {
+                    authViewModel.sendPasswordResetEmail(email)
+                },
+            color = if (isLoading) Color(0xFF9CA3AF) else Color(0xFF2D6CDF),
             fontSize = 12.sp
         )
+
+        resetPasswordMessage?.let { message ->
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = message,
+                modifier = Modifier.fillMaxWidth(),
+                color = if (
+                    message == "Correo de recuperación enviado. Revisa tu bandeja de entrada."
+                ) {
+                    Color(0xFF15803D)
+                } else {
+                    Color(0xFFE11D48)
+                },
+                fontSize = 12.sp
+            )
+        }
 
         Spacer(modifier = Modifier.height(22.dp))
 
