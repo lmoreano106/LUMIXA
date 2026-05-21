@@ -45,8 +45,8 @@ class AdminRepository(
     }
 
     suspend fun getAdminDashboardData(): AdminDashboardData {
-        val usersSnapshot = suspendCoroutine<com.google.firebase.firestore.QuerySnapshot> { continuation ->
-            firestore.collection("users")
+        val profilesSnapshot = suspendCoroutine<com.google.firebase.firestore.QuerySnapshot> { continuation ->
+            firestore.collectionGroup("profile")
                 .get()
                 .addOnSuccessListener { continuation.resume(it) }
                 .addOnFailureListener { continuation.resumeWithException(it) }
@@ -58,22 +58,15 @@ class AdminRepository(
         var totalExpenseRecords = 0
         var totalGoalRecords = 0
 
-        for (userDoc in usersSnapshot.documents) {
-            val uid = userDoc.id
+        for (profileDoc in profilesSnapshot.documents) {
+            if (profileDoc.id != "main") continue
 
-            val profileSnapshot = suspendCoroutine<com.google.firebase.firestore.DocumentSnapshot> { continuation ->
-                firestore.collection("users")
-                    .document(uid)
-                    .collection("profile")
-                    .document("main")
-                    .get()
-                    .addOnSuccessListener { continuation.resume(it) }
-                    .addOnFailureListener { continuation.resumeWithException(it) }
-            }
+            val userDocRef = profileDoc.reference.parent.parent ?: continue
+            val uid = userDocRef.id
 
-            val email = profileSnapshot.getString("email") ?: "Sin correo"
-            val displayName = profileSnapshot.getString("displayName") ?: "Usuario"
-            val role = profileSnapshot.getString("role") ?: "user"
+            val email = profileDoc.getString("email") ?: "Sin correo"
+            val displayName = profileDoc.getString("displayName") ?: "Usuario"
+            val role = profileDoc.getString("role") ?: "user"
 
             summaries.add(
                 AdminUserSummary(
@@ -85,9 +78,7 @@ class AdminRepository(
             )
 
             val expensesSnapshot = suspendCoroutine<com.google.firebase.firestore.QuerySnapshot> { continuation ->
-                firestore.collection("users")
-                    .document(uid)
-                    .collection("expenses")
+                userDocRef.collection("expenses")
                     .get()
                     .addOnSuccessListener { continuation.resume(it) }
                     .addOnFailureListener { continuation.resumeWithException(it) }
@@ -99,9 +90,7 @@ class AdminRepository(
             }
 
             val goalsSnapshot = suspendCoroutine<com.google.firebase.firestore.QuerySnapshot> { continuation ->
-                firestore.collection("users")
-                    .document(uid)
-                    .collection("goals")
+                userDocRef.collection("goals")
                     .get()
                     .addOnSuccessListener { continuation.resume(it) }
                     .addOnFailureListener { continuation.resumeWithException(it) }
