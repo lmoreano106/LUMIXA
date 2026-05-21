@@ -180,7 +180,7 @@ fun LoginScreen(
                 text = message,
                 modifier = Modifier.fillMaxWidth(),
                 color = if (
-                    message == "Correo de recuperación enviado. Revisa tu bandeja de entrada."
+                    message == "Correo de recuperación enviado. Revisa tu bandeja de entrada o en el spam"
                 ) {
                     Color(0xFF15803D)
                 } else {

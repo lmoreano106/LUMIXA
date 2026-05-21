@@ -37,7 +37,9 @@ fun ExpensesScreen(
     expenseViewModel: ExpenseViewModel
 ) {
     val expenses by expenseViewModel.expenses.collectAsState()
-    val currencySymbol = remember { CurrencyPreferences(androidx.compose.ui.platform.LocalContext.current).getCurrencySymbol() }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val currencyPreferences = remember(context) { CurrencyPreferences(context) }
+    val currencySymbol = currencyPreferences.getCurrencySymbol()
 
     var selectedTab by remember { mutableStateOf(0) }
     var selectedExpense by remember { mutableStateOf<ExpenseEntity?>(null) }
