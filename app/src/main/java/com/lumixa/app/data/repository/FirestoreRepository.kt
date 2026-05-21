@@ -1,6 +1,7 @@
 package com.lumixa.app.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -43,7 +44,7 @@ class FirestoreRepository(
                 .document(userId)
                 .collection("profile")
                 .document("main")
-                .set(profileData)
+                .set(profileData, SetOptions.merge())
                 .addOnSuccessListener {
                     continuation.resume(Unit)
                 }
