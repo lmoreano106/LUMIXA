@@ -47,6 +47,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.lumixa.app.data.preferences.CurrencyPreferences
 import com.lumixa.app.data.repository.FirestoreRepository
+import com.lumixa.app.presentation.components.LumixaColors
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -103,7 +104,7 @@ fun ProfileScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF4F6F8))
+            .background(LumixaColors.Surface)
     ) {
         Column(
             modifier = Modifier

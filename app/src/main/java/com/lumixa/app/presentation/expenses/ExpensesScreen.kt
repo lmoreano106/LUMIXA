@@ -22,6 +22,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lumixa.app.data.preferences.CurrencyPreferences
+import com.lumixa.app.presentation.components.LumixaColors
+import com.lumixa.app.presentation.components.LumixaEmptyStateCard
 import com.lumixa.app.data.local.entity.ExpenseEntity
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 import java.text.SimpleDateFormat
@@ -34,6 +37,7 @@ fun ExpensesScreen(
     expenseViewModel: ExpenseViewModel
 ) {
     val expenses by expenseViewModel.expenses.collectAsState()
+    val currencySymbol = remember { CurrencyPreferences(androidx.compose.ui.platform.LocalContext.current).getCurrencySymbol() }
 
     var selectedTab by remember { mutableStateOf(0) }
     var selectedExpense by remember { mutableStateOf<ExpenseEntity?>(null) }
@@ -102,7 +106,7 @@ fun ExpensesScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF4F6F8))
+            .background(LumixaColors.Surface)
             .padding(20.dp)
     ) {
         Text(
@@ -114,7 +118,7 @@ fun ExpensesScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TabRow(selectedTabIndex = selectedTab) {
+        TabRow(selectedTabIndex = selectedTab, containerColor = Color.White) {
             Tab(
                 selected = selectedTab == 0,
                 onClick = { selectedTab = 0 },
@@ -140,7 +144,7 @@ fun ExpensesScreen(
             0 -> {
                 RealExpensesList(
                     title = "Gastos de hoy",
-                    total = "$${totalToday.toInt()}",
+                    total = "$currencySymbol${totalToday.toInt()}",
                     expenses = todayExpenses,
                     onExpenseClick = {
                         selectedExpense = it
@@ -150,7 +154,7 @@ fun ExpensesScreen(
 
             1 -> {
                 WeeklyExpensesList(
-                    total = "$${totalWeek.toInt()}",
+                    total = "$currencySymbol${totalWeek.toInt()}",
                     expenses = expenses,
                     onExpenseClick = {
                         selectedExpense = it
@@ -161,7 +165,7 @@ fun ExpensesScreen(
             2 -> {
                 DateExpensesList(
                     selectedDate = selectedDate,
-                    total = "$${totalByDate.toInt()}",
+                    total = "$currencySymbol${totalByDate.toInt()}",
                     expenses = filteredByDate,
                     onSelectDateClick = {
                         showDatePicker = true

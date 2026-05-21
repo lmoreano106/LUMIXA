@@ -33,6 +33,8 @@ import androidx.compose.ui.unit.sp
 import com.lumixa.app.data.local.entity.ExpenseEntity
 import com.lumixa.app.data.local.entity.GoalEntity
 import com.lumixa.app.data.preferences.CurrencyPreferences
+import com.lumixa.app.presentation.components.LumixaColors
+import com.lumixa.app.presentation.components.LumixaEmptyStateCard
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 import com.lumixa.app.presentation.viewmodel.GoalViewModel
 import com.lumixa.app.presentation.viewmodel.SavingsViewModel
@@ -66,7 +68,7 @@ fun StatisticsScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)),
+            .background(LumixaColors.Surface),
         contentPadding = PaddingValues(20.dp)
     ) {
         item {
@@ -82,6 +84,10 @@ fun StatisticsScreen(
             GoalProgressStatsCard(goals, totalSavings, currencySymbol)
 
             Spacer(modifier = Modifier.height(16.dp))
+            if (expenses.isEmpty()) {
+                LumixaEmptyStateCard("Sin movimientos", "Cuando registres gastos podrás ver tendencias y distribución.")
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
             ExpenseTrendCard(expenses = expenses, currencySymbol = currencySymbol)
 
