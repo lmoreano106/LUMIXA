@@ -28,6 +28,8 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,8 +39,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -48,6 +50,7 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import com.lumixa.app.data.preferences.CurrencyPreferences
 import com.lumixa.app.data.repository.FirestoreRepository
 import com.lumixa.app.presentation.components.LumixaColors
+import androidx.compose.material3.MaterialTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -64,7 +67,9 @@ private data class CurrencyItem(
 
 @Composable
 fun ProfileScreen(
-    onLogoutClick: () -> Unit
+    onLogoutClick: () -> Unit,
+    darkModeEnabled: Boolean,
+    onThemeChange: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
     val user = FirebaseAuth.getInstance().currentUser
@@ -104,7 +109,7 @@ fun ProfileScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(LumixaColors.Surface)
+            .background(LumixaColors.surface())
     ) {
         Column(
             modifier = Modifier
@@ -116,7 +121,7 @@ fun ProfileScreen(
                 text = "Perfil",
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF0F2A44)
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(22.dp))
@@ -124,7 +129,7 @@ fun ProfileScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
             ) {
                 Column(
@@ -134,14 +139,14 @@ fun ProfileScreen(
                     Box(
                         modifier = Modifier
                             .size(76.dp)
-                            .background(Color(0xFF2D6CDF), CircleShape),
+                            .background(MaterialTheme.colorScheme.primary, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = username.take(1).uppercase(),
                             fontSize = 30.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
 
@@ -151,10 +156,10 @@ fun ProfileScreen(
                         Text(
                             text = "Avatar",
                             fontSize = 12.sp,
-                            color = Color(0xFF2B2B2B)
+                            color = LumixaColors.textSecondary()
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "✎", fontSize = 14.sp, color = Color(0xFF1FBF9F))
+                        Text(text = "✎", fontSize = 14.sp, color = MaterialTheme.colorScheme.secondary)
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
@@ -163,7 +168,7 @@ fun ProfileScreen(
                         text = username,
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF0F2A44)
+                        color = MaterialTheme.colorScheme.onBackground
                     )
 
                     Spacer(modifier = Modifier.height(4.dp))
@@ -171,7 +176,7 @@ fun ProfileScreen(
                     Text(
                         text = email,
                         fontSize = 13.sp,
-                        color = Color(0xFF6B7280)
+                        color = LumixaColors.textSecondary()
                     )
                 }
             }
@@ -192,7 +197,7 @@ fun ProfileScreen(
 
             nameError?.let {
                 Spacer(modifier = Modifier.height(6.dp))
-                Text(text = it, fontSize = 12.sp, color = Color(0xFFE11D48))
+                Text(text = it, fontSize = 12.sp, color = MaterialTheme.colorScheme.error)
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -221,7 +226,7 @@ fun ProfileScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
@@ -229,7 +234,7 @@ fun ProfileScreen(
                         text = "SELECCIONAR MONEDA",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF6B7280)
+                        color = LumixaColors.textSecondary()
                     )
                     Spacer(modifier = Modifier.height(10.dp))
 
@@ -242,6 +247,47 @@ fun ProfileScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 18.dp, vertical = 14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Modo oscuro",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Activa una apariencia más cómoda para baja luz",
+                            fontSize = 12.sp,
+                            color = LumixaColors.textSecondary()
+                        )
+                    }
+
+                    Switch(
+                        checked = darkModeEnabled,
+                        onCheckedChange = onThemeChange,
+                        enabled = !isSaving,
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
                 }
             }
 
@@ -317,16 +363,16 @@ fun ProfileScreen(
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
                         strokeWidth = 2.dp,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Guardando...", color = Color.White)
+                    Text(text = "Guardando...", color = MaterialTheme.colorScheme.onPrimary)
                 } else {
                     Text(
                         text = "Guardar cambios",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
@@ -345,7 +391,7 @@ fun ProfileScreen(
                     text = "Cerrar sesión",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }
@@ -388,7 +434,7 @@ private fun CurrencySelectorItem(
         Text(
             text = "${item.code} · ${item.name} (${item.symbol})",
             fontSize = 14.sp,
-            color = Color(0xFF0F2A44),
+            color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Medium
         )
 
@@ -409,7 +455,7 @@ fun ProfileInfoCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         border = BorderStroke(1.dp, Color(0xFFE5E7EB))
     ) {
@@ -420,7 +466,7 @@ fun ProfileInfoCard(
                 text = title.uppercase(),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF6B7280)
+                color = LumixaColors.textSecondary()
             )
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -429,7 +475,7 @@ fun ProfileInfoCard(
                 text = value,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF0F2A44)
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
     }

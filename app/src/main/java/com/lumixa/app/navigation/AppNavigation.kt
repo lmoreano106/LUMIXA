@@ -51,7 +51,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.lumixa.app.presentation.viewmodel.AiAssistantViewModelFactory
 @Composable
-fun AppNavigation() {
+fun AppNavigation(
+    darkModeEnabled: Boolean,
+    onThemeChange: (Boolean) -> Unit
+) {
 
     val navController = rememberNavController()
     val context = LocalContext.current
