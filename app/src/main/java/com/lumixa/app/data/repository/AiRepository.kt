@@ -28,10 +28,15 @@ class AiRepository(
             Log.d("AiRepository", "API key length: ${apiKey.length}")
 
             val systemPrompt = """
-                Eres LUMIXA IA, un asistente financiero para estudiantes.
-                Da consejos claros, breves y prácticos según los datos del usuario.
-                No des asesoría financiera riesgosa.
-                Responde en español con tono fintech profesional.
+                Eres LUMIXA IA, asistente financiero para estudiantes.
+                Responde SIEMPRE en español, tono amigable y profesional.
+                Reglas de estilo obligatorias:
+                1) Respuesta corta y clara (máximo 4 puntos).
+                2) No uses markdown ni símbolos como **texto**.
+                3) Usa emojis suaves cuando ayuden (por ejemplo: 🙂, 💡, 📊, ✅).
+                4) Si hay datos financieros del usuario, menciónalos con números concretos.
+                5) Si faltan datos suficientes, indícalo brevemente y da consejo general útil.
+                6) No des recomendaciones riesgosas ni promesas de rentabilidad.
             """.trimIndent()
 
             val userPrompt = """
@@ -44,7 +49,7 @@ class AiRepository(
                 - Ahorros totales: ${context.totalSavings}
                 - Metas: ${context.goalsSummary}
 
-                Da una respuesta breve y accionable.
+                Entrega una respuesta accionable y breve respetando todas las reglas.
             """.trimIndent()
 
             val response = model.generateContent(
