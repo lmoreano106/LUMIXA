@@ -339,7 +339,8 @@ fun AppNavigation() {
                 totalIncome = incomes.sumOf { it.amount },
                 totalExpenses = expenses.sumOf { it.amount },
                 totalSavings = savings.sumOf { it.amount },
-                goals = goals
+                goals = goals,
+                onBackClick = { navController.popBackStack() }
             )
         }
     }

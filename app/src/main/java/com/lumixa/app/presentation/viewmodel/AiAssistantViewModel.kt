@@ -10,9 +10,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+enum class ChatAuthor {
+    USER,
+    ASSISTANT
+}
+
+data class ChatMessage(
+    val author: ChatAuthor,
+    val content: String
+)
+
 data class AiAssistantUiState(
     val isLoading: Boolean = false,
-    val response: String = "",
+    val messages: List<ChatMessage> = emptyList(),
     val error: String? = null
 )
 
@@ -31,12 +41,18 @@ class AiAssistantViewModel(
         goals: List<GoalEntity>
     ) {
         if (question.isBlank()) {
-            _uiState.value = AiAssistantUiState(error = "Escribe una pregunta para continuar.")
+            _uiState.value = _uiState.value.copy(error = "Escribe una pregunta para continuar.")
             return
         }
 
+        val userMessage = ChatMessage(author = ChatAuthor.USER, content = question.trim())
+        _uiState.value = _uiState.value.copy(
+            isLoading = true,
+            error = null,
+            messages = _uiState.value.messages + userMessage
+        )
+
         viewModelScope.launch {
-            _uiState.value = AiAssistantUiState(isLoading = true)
             runCatching {
                 val goalsSummary = if (goals.isEmpty()) {
                     "Sin metas registradas"
@@ -56,9 +72,15 @@ class AiAssistantViewModel(
                     )
                 )
             }.onSuccess { answer ->
-                _uiState.value = AiAssistantUiState(response = answer)
+                val assistantMessage = ChatMessage(author = ChatAuthor.ASSISTANT, content = answer)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    messages = _uiState.value.messages + assistantMessage,
+                    error = null
+                )
             }.onFailure {
-                _uiState.value = AiAssistantUiState(
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
                     error = "No se pudo obtener respuesta de IA. Verifica tu conexión e intenta de nuevo."
                 )
             }
