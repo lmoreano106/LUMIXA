@@ -14,6 +14,7 @@ import com.lumixa.app.presentation.statistics.StatisticsScreen
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 import com.lumixa.app.presentation.viewmodel.GoalViewModel
 import com.lumixa.app.presentation.viewmodel.IncomeViewModel
+import com.lumixa.app.presentation.viewmodel.ExpensePredictionViewModel
 import com.lumixa.app.presentation.viewmodel.SavingsViewModel
 import com.lumixa.app.presentation.viewmodel.DashboardAiInsightViewModel
 
@@ -28,7 +29,8 @@ fun MainScreen(
     onLogoutClick: () -> Unit,
     onAiAssistantClick: () -> Unit,
     savingsViewModel: SavingsViewModel,
-    dashboardAiInsightViewModel: DashboardAiInsightViewModel
+    dashboardAiInsightViewModel: DashboardAiInsightViewModel,
+    expensePredictionViewModel: ExpensePredictionViewModel
 ) {
 
     var selectedTab by remember {
@@ -120,7 +122,9 @@ fun MainScreen(
             2 -> StatisticsScreen(
                 expenseViewModel = expenseViewModel,
                 goalViewModel = goalViewModel,
-                savingsViewModel = savingsViewModel
+                savingsViewModel = savingsViewModel,
+                incomeViewModel = incomeViewModel,
+                expensePredictionViewModel = expensePredictionViewModel
             )
 
             3 -> ProfileScreen(

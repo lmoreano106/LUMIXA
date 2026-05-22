@@ -4,6 +4,18 @@ import android.util.Log
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 
+import com.lumixa.app.data.local.entity.ExpenseEntity
+import com.lumixa.app.data.local.entity.GoalEntity
+import com.lumixa.app.data.local.entity.IncomeEntity
+import com.lumixa.app.data.local.entity.SavingsEntity
+import kotlin.math.roundToInt
+
+data class ExpensePredictionResult(
+    val riskLevel: String,
+    val prediction: String,
+    val recommendation: String
+)
+
 data class FinancialContext(
     val totalIncome: Double,
     val totalExpenses: Double,
@@ -148,6 +160,71 @@ class AiRepository(
         } catch (e: Exception) {
             Log.e("AiRepository", "Error generando análisis de meta", e)
             "No fue posible generar el análisis inteligente en este momento."
+        }
+    }
+
+
+    suspend fun generateExpensePrediction(
+        expenses: List<ExpenseEntity>,
+        incomes: List<IncomeEntity>,
+        savings: List<SavingsEntity>,
+        goals: List<GoalEntity>
+    ): ExpensePredictionResult? {
+        return try {
+            val totalExpenses = expenses.sumOf { it.amount }
+            val totalIncomes = incomes.sumOf { it.amount }
+            val totalSavings = savings.sumOf { it.amount }
+            val goalsSummary = if (goals.isEmpty()) "Sin metas registradas" else goals.joinToString { "${it.name}: ${it.savedAmount}/${it.targetAmount}" }
+
+            val systemPrompt = """
+                Eres LUMIXA IA. Responde SIEMPRE en español con exactamente 3 líneas sin markdown:
+                1) Riesgo: bajo/moderado/alto.
+                2) Predicción: Si mantienes este ritmo, gastarías aproximadamente X este mes.
+                3) Recomendación: Reduce gastos en la categoría más alta.
+            """.trimIndent()
+
+            val topCategory = expenses.groupBy { it.category }.maxByOrNull { it.value.sumOf { e -> e.amount } }?.key ?: "Sin categoría"
+
+            val userPrompt = """
+                Datos del usuario:
+                - Gastos (${expenses.size}): total $totalExpenses
+                - Ingresos (${incomes.size}): total $totalIncomes
+                - Ahorros (${savings.size}): total $totalSavings
+                - Metas: $goalsSummary
+                - Categoría de mayor gasto: $topCategory
+
+                Incluye una predicción numérica mensual razonable según el ritmo observado.
+            """.trimIndent()
+
+            val response = model.generateContent(
+                content {
+                    text(systemPrompt)
+                    text(userPrompt)
+                }
+            )
+
+            val text = response.text?.trim().orEmpty()
+            if (text.isBlank()) return null
+
+            val lines = text.lines().map { it.trim() }.filter { it.isNotBlank() }
+            val riskLine = lines.firstOrNull { it.contains("riesgo", ignoreCase = true) } ?: return null
+            val predictionLine = lines.firstOrNull { it.contains("predicción", ignoreCase = true) || it.contains("gastarías", ignoreCase = true) } ?: return null
+            val recommendationLine = lines.firstOrNull { it.contains("recomendación", ignoreCase = true) || it.contains("reduce", ignoreCase = true) } ?: return null
+
+            val risk = when {
+                riskLine.contains("alto", ignoreCase = true) -> "alto"
+                riskLine.contains("bajo", ignoreCase = true) -> "bajo"
+                else -> "moderado"
+            }
+
+            ExpensePredictionResult(
+                riskLevel = risk,
+                prediction = predictionLine.substringAfter(":", predictionLine).trim(),
+                recommendation = recommendationLine.substringAfter(":", recommendationLine).trim()
+            )
+        } catch (e: Exception) {
+            Log.e("AiRepository", "Error generando predicción de gastos", e)
+            null
         }
     }
 }

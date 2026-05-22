@@ -12,6 +12,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
@@ -37,6 +38,8 @@ import com.lumixa.app.presentation.components.LumixaColors
 import com.lumixa.app.presentation.components.LumixaEmptyStateCard
 import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 import com.lumixa.app.presentation.viewmodel.GoalViewModel
+import com.lumixa.app.presentation.viewmodel.IncomeViewModel
+import com.lumixa.app.presentation.viewmodel.ExpensePredictionViewModel
 import com.lumixa.app.presentation.viewmodel.SavingsViewModel
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -53,11 +56,15 @@ import kotlin.math.roundToInt
 fun StatisticsScreen(
     expenseViewModel: ExpenseViewModel,
     goalViewModel: GoalViewModel,
-    savingsViewModel: SavingsViewModel
+    savingsViewModel: SavingsViewModel,
+    incomeViewModel: IncomeViewModel,
+    expensePredictionViewModel: ExpensePredictionViewModel
 ) {
     val expenses by expenseViewModel.expenses.collectAsState()
     val goals by goalViewModel.goals.collectAsState()
     val savings by savingsViewModel.savings.collectAsState()
+    val incomes by incomeViewModel.incomes.collectAsState()
+    val predictionState by expensePredictionViewModel.uiState.collectAsState()
 
     val context = LocalContext.current
     val currencyPrefs = remember(context) { CurrencyPreferences(context) }
@@ -98,6 +105,30 @@ fun StatisticsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             SmartAnalysisCard(expenses = expenses, currencySymbol = currencySymbol)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            ExpensePredictionCard(
+                state = predictionState,
+                onRefresh = {
+                    expensePredictionViewModel.loadPrediction(
+                        expenses = expenses,
+                        incomes = incomes,
+                        savings = savings,
+                        goals = goals,
+                        forceRefresh = true
+                    )
+                }
+            )
+
+            LaunchedEffect(expenses, incomes, savings, goals) {
+                expensePredictionViewModel.loadPrediction(
+                    expenses = expenses,
+                    incomes = incomes,
+                    savings = savings,
+                    goals = goals
+                )
+            }
 
             Spacer(modifier = Modifier.height(90.dp))
         }
@@ -387,4 +418,72 @@ private fun formatCurrency(amount: Double, symbol: String): String {
     }
     val formatter = DecimalFormat("#,##0.##", symbols)
     return "$symbol${formatter.format(amount)}"
+}
+
+
+@Composable
+fun ExpensePredictionCard(
+    state: com.lumixa.app.presentation.viewmodel.ExpensePredictionUiState,
+    onRefresh: () -> Unit
+) {
+    val riskColor = when (state.riskLevel.lowercase()) {
+        "alto" -> Color(0xFFD64B4B)
+        "bajo" -> Color(0xFF1FBF9F)
+        else -> Color(0xFF2D6CDF)
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF4F6F8)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "PREDICCIÓN DE GASTOS",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F2A44)
+                )
+                Text(
+                    text = "Riesgo: ${state.riskLevel}",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = riskColor
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White, RoundedCornerShape(14.dp))
+                    .padding(12.dp)
+            ) {
+                if (state.isLoading) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        CircularProgressIndicator(color = Color(0xFF2D6CDF), strokeWidth = 3.dp, modifier = Modifier.size(20.dp))
+                        Text("Analizando tus hábitos de gasto...", color = Color(0xFF2B2B2B))
+                    }
+                } else {
+                    Column(horizontalAlignment = Alignment.Start) {
+                        Text(state.prediction, color = Color(0xFF2B2B2B), style = MaterialTheme.typography.bodyMedium)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFE5E7EB)))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(state.recommendation, color = Color(0xFF0F2A44), style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "Actualizar predicción",
+                color = Color(0xFF2D6CDF),
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.clickable { onRefresh() }
+            )
+        }
+    }
 }

@@ -42,6 +42,8 @@ import com.lumixa.app.presentation.viewmodel.DashboardAiInsightViewModel
 import com.lumixa.app.presentation.viewmodel.DashboardAiInsightViewModelFactory
 import com.lumixa.app.presentation.viewmodel.GoalAiAnalysisViewModel
 import com.lumixa.app.presentation.viewmodel.GoalAiAnalysisViewModelFactory
+import com.lumixa.app.presentation.viewmodel.ExpensePredictionViewModel
+import com.lumixa.app.presentation.viewmodel.ExpensePredictionViewModelFactory
 import com.lumixa.app.presentation.ai.AiAssistantScreen
 import com.lumixa.app.data.repository.AiRepository
 import com.lumixa.app.BuildConfig
@@ -100,6 +102,9 @@ fun AppNavigation() {
     )
     val goalAiAnalysisViewModel: GoalAiAnalysisViewModel = viewModel(
         factory = GoalAiAnalysisViewModelFactory(aiRepository)
+    )
+    val expensePredictionViewModel: ExpensePredictionViewModel = viewModel(
+        factory = ExpensePredictionViewModelFactory(aiRepository)
     )
 
     val migrationRepository = LocalDataMigrationRepository(
