@@ -146,7 +146,7 @@ fun AiAssistantScreen(
             }
         }
 
-        HorizontalDivider(color = LumixaColors.Border)
+        HorizontalDivider(color = Color(0xFFE5E7EB))
 
         OutlinedTextField(
             value = question,
@@ -180,7 +180,7 @@ fun AiAssistantScreen(
 private fun ChatBubble(message: ChatMessage) {
     val isUser = message.author == ChatAuthor.USER
     val bubbleColor = if (isUser) Color(0xFF2D6CDF) else Color(0xFF1FBF9F)
-    val align = if (isUser) Alignment.CenterEnd else Alignment.CenterStart
+    val align = if (isUser) Alignment.End else Alignment.Start
 
     Column(
         modifier = Modifier.fillMaxWidth(),
