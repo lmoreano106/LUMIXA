@@ -30,7 +30,9 @@ fun MainScreen(
     onAiAssistantClick: () -> Unit,
     savingsViewModel: SavingsViewModel,
     dashboardAiInsightViewModel: DashboardAiInsightViewModel,
-    expensePredictionViewModel: ExpensePredictionViewModel
+    expensePredictionViewModel: ExpensePredictionViewModel,
+    darkModeEnabled: Boolean,
+    onThemeChange: (Boolean) -> Unit
 ) {
 
     var selectedTab by remember {
@@ -128,7 +130,9 @@ fun MainScreen(
             )
 
             3 -> ProfileScreen(
-                onLogoutClick = onLogoutClick
+                onLogoutClick = onLogoutClick,
+                darkModeEnabled = darkModeEnabled,
+                onThemeChange = onThemeChange
             )
         }
     }
