@@ -49,6 +49,7 @@ import com.lumixa.app.data.repository.AiRepository
 import com.lumixa.app.BuildConfig
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.lumixa.app.presentation.viewmodel.AiAssistantViewModelFactory
 @Composable
 fun AppNavigation() {
 
@@ -96,7 +97,9 @@ fun AppNavigation() {
     )
     val aiRepository = AiRepository(BuildConfig.GEMINI_API_KEY)
 
-    val aiAssistantViewModel = AiAssistantViewModel(aiRepository)
+    val aiAssistantViewModel: AiAssistantViewModel = viewModel(
+        factory = AiAssistantViewModelFactory(aiRepository)
+    )
     val dashboardAiInsightViewModel: DashboardAiInsightViewModel = viewModel(
         factory = DashboardAiInsightViewModelFactory(aiRepository)
     )
@@ -215,7 +218,7 @@ fun AppNavigation() {
 
             MainScreen(
                 goalViewModel = goalViewModel,
-
+                expensePredictionViewModel = expensePredictionViewModel,
                 incomeViewModel = incomeViewModel,
                 expenseViewModel = expenseViewModel,
                 savingsViewModel = savingsViewModel,
