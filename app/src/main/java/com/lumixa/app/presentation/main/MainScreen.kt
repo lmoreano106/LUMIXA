@@ -15,6 +15,7 @@ import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 import com.lumixa.app.presentation.viewmodel.GoalViewModel
 import com.lumixa.app.presentation.viewmodel.IncomeViewModel
 import com.lumixa.app.presentation.viewmodel.SavingsViewModel
+import com.lumixa.app.presentation.viewmodel.DashboardAiInsightViewModel
 
 @Composable
 fun MainScreen(
@@ -26,7 +27,8 @@ fun MainScreen(
     onGoalClick: () -> Unit,
     onLogoutClick: () -> Unit,
     onAiAssistantClick: () -> Unit,
-    savingsViewModel: SavingsViewModel
+    savingsViewModel: SavingsViewModel,
+    dashboardAiInsightViewModel: DashboardAiInsightViewModel
 ) {
 
     var selectedTab by remember {
@@ -107,7 +109,8 @@ fun MainScreen(
                 onGoalClick = onGoalClick,
                 onLogoutClick = onLogoutClick,
                 onAiAssistantClick = onAiAssistantClick,
-                savingsViewModel = savingsViewModel
+                savingsViewModel = savingsViewModel,
+                dashboardAiInsightViewModel = dashboardAiInsightViewModel
             )
 
             1 -> ExpensesScreen(
