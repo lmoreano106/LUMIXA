@@ -32,6 +32,7 @@ import com.lumixa.app.presentation.viewmodel.ExpenseViewModel
 import com.lumixa.app.presentation.viewmodel.GoalViewModel
 import com.lumixa.app.presentation.viewmodel.IncomeViewModel
 import com.lumixa.app.presentation.viewmodel.SavingsViewModel
+import com.lumixa.app.presentation.viewmodel.DashboardAiInsightViewModel
 import com.lumixa.app.utils.FinancialCalculator
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -44,6 +45,7 @@ fun DashboardScreen(
     incomeViewModel: IncomeViewModel,
     goalViewModel: GoalViewModel,
     savingsViewModel: SavingsViewModel,
+    dashboardAiInsightViewModel: DashboardAiInsightViewModel,
     modifier: Modifier = Modifier,
     onAddExpenseClick: () -> Unit = {},
     onAddIncomeClick: () -> Unit = {},
@@ -56,6 +58,7 @@ fun DashboardScreen(
     val incomes by incomeViewModel.incomes.collectAsState()
     val goals by goalViewModel.goals.collectAsState()
     val savings by savingsViewModel.savings.collectAsState()
+    val aiInsightUiState by dashboardAiInsightViewModel.uiState.collectAsState()
 
     val context = LocalContext.current
 
@@ -107,6 +110,15 @@ fun DashboardScreen(
         savingsViewModel.saveDailySaving(
             amount = savingsToday,
             date = todayDate
+        )
+    }
+
+    LaunchedEffect(totalIncome, totalExpenses, totalSavings, goals) {
+        dashboardAiInsightViewModel.loadInsight(
+            totalIncome = totalIncome,
+            totalExpenses = totalExpenses,
+            totalSavings = totalSavings,
+            goals = goals
         )
     }
 
@@ -198,6 +210,22 @@ fun DashboardScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            DashboardAiInsightCard(
+                insight = aiInsightUiState.insight,
+                isLoading = aiInsightUiState.isLoading,
+                onRefreshClick = {
+                    dashboardAiInsightViewModel.loadInsight(
+                        totalIncome = totalIncome,
+                        totalExpenses = totalExpenses,
+                        totalSavings = totalSavings,
+                        goals = goals,
+                        forceRefresh = true
+                    )
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -259,6 +287,58 @@ fun DashboardScreen(
                 savingsToday = totalSavings,
                 onClick = onGoalClick
             )
+        }
+    }
+}
+
+@Composable
+private fun DashboardAiInsightCard(
+    insight: String,
+    isLoading: Boolean,
+    onRefreshClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "💡 Consejo inteligente",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF0F2A44)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            if (isLoading) {
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color(0xFF2D6CDF),
+                    trackColor = Color(0xFFF4F6F8)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            Text(
+                text = insight,
+                fontSize = 13.sp,
+                color = Color(0xFF2B2B2B),
+                maxLines = 2
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Button(
+                onClick = onRefreshClick,
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F2A44)),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                Text(
+                    text = "Actualizar consejo",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
     }
 }

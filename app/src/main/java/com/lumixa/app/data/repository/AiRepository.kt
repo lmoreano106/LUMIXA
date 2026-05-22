@@ -67,4 +67,40 @@ class AiRepository(
             "No se pudo obtener respuesta de IA. Verifica tu conexión e intenta de nuevo."
         }
     }
+
+    suspend fun generateDashboardInsight(
+        context: FinancialContext
+    ): String {
+        return try {
+            val systemPrompt = """
+                Eres LUMIXA IA, asistente financiero para estudiantes.
+                Responde SIEMPRE en español, en máximo 2 líneas y máximo 140 caracteres.
+                Entrega un consejo puntual, accionable y seguro.
+                No uses markdown.
+            """.trimIndent()
+
+            val userPrompt = """
+                Genera 1 consejo financiero breve para el dashboard.
+                Datos:
+                - Ingresos totales: ${context.totalIncome}
+                - Gastos totales: ${context.totalExpenses}
+                - Ahorros totales: ${context.totalSavings}
+                - Metas: ${context.goalsSummary}
+            """.trimIndent()
+
+            val response = model.generateContent(
+                content {
+                    text(systemPrompt)
+                    text(userPrompt)
+                }
+            )
+
+            response.text?.trim().orEmpty().ifBlank {
+                "Controla tus gastos diarios y reserva una parte fija para tus metas."
+            }
+        } catch (e: Exception) {
+            Log.e("AiRepository", "Error generando insight de dashboard", e)
+            "Controla tus gastos diarios y reserva una parte fija para tus metas."
+        }
+    }
 }

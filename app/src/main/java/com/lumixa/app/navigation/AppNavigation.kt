@@ -38,6 +38,8 @@ import androidx.compose.runtime.LaunchedEffect
 import com.google.firebase.auth.FirebaseAuth
 import com.lumixa.app.data.repository.LocalDataMigrationRepository
 import com.lumixa.app.presentation.viewmodel.AiAssistantViewModel
+import com.lumixa.app.presentation.viewmodel.DashboardAiInsightViewModel
+import com.lumixa.app.presentation.viewmodel.DashboardAiInsightViewModelFactory
 import com.lumixa.app.presentation.ai.AiAssistantScreen
 import com.lumixa.app.data.repository.AiRepository
 import com.lumixa.app.BuildConfig
@@ -91,6 +93,9 @@ fun AppNavigation() {
     val aiRepository = AiRepository(BuildConfig.GEMINI_API_KEY)
 
     val aiAssistantViewModel = AiAssistantViewModel(aiRepository)
+    val dashboardAiInsightViewModel: DashboardAiInsightViewModel = viewModel(
+        factory = DashboardAiInsightViewModelFactory(aiRepository)
+    )
 
     val migrationRepository = LocalDataMigrationRepository(
         expenseDao = database.expenseDao(),
@@ -222,6 +227,7 @@ fun AppNavigation() {
                 onAiAssistantClick = {
                     navController.navigate(Routes.AiAssistant.route)
                 },
+                dashboardAiInsightViewModel = dashboardAiInsightViewModel,
                 onLogoutClick = {
 
                     authViewModel.logout()
