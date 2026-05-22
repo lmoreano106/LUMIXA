@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -18,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lumixa.app.presentation.viewmodel.GoalViewModel
+import com.lumixa.app.presentation.viewmodel.GoalAiAnalysisViewModel
 import com.lumixa.app.presentation.viewmodel.SavingsViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -26,6 +28,7 @@ import kotlin.math.ceil
 import kotlin.math.max
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import com.lumixa.app.data.preferences.CurrencyPreferences
 import androidx.compose.material3.Button
@@ -35,11 +38,17 @@ import com.lumixa.app.presentation.components.LumixaColors
 fun GoalDetailScreen(
     goalViewModel: GoalViewModel,
     savingsViewModel: SavingsViewModel,
+    incomeViewModel: com.lumixa.app.presentation.viewmodel.IncomeViewModel,
+    expenseViewModel: com.lumixa.app.presentation.viewmodel.ExpenseViewModel,
+    goalAiAnalysisViewModel: GoalAiAnalysisViewModel,
     onBackClick: () -> Unit,
     onEditClick: () -> Unit
 )  {
     val goals by goalViewModel.goals.collectAsState()
     val savings by savingsViewModel.savings.collectAsState()
+    val incomes by incomeViewModel.incomes.collectAsState()
+    val expenses by expenseViewModel.expenses.collectAsState()
+    val aiUiState by goalAiAnalysisViewModel.uiState.collectAsState()
 
     val goal = goals.firstOrNull()
     val totalSavings = savings.sumOf { it.amount }
@@ -147,6 +156,46 @@ fun GoalDetailScreen(
                     recommendedDailySaving = recommendedDailySaving,
                     currencySymbol = currencySymbol
                 )
+
+                LaunchedEffect(
+                    goal.id,
+                    goal.targetAmount,
+                    goal.targetDate,
+                    totalSavings,
+                    incomes.size,
+                    expenses.size
+                ) {
+                    goalAiAnalysisViewModel.loadAnalysis(
+                        goalName = goal.name,
+                        targetAmount = goal.targetAmount,
+                        savedAmount = totalSavings,
+                        targetDate = goal.targetDate,
+                        totalIncome = incomes.sumOf { it.amount },
+                        totalExpenses = expenses.sumOf { it.amount },
+                        totalSavings = totalSavings,
+                        daysLeft = daysLeft
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                GoalAiAnalysisCard(
+                    analysis = aiUiState.analysis,
+                    isLoading = aiUiState.isLoading,
+                    usedFallback = aiUiState.usedFallback,
+                    onRefreshClick = {
+                        goalAiAnalysisViewModel.loadAnalysis(
+                            goalName = goal.name,
+                            targetAmount = goal.targetAmount,
+                            savedAmount = totalSavings,
+                            targetDate = goal.targetDate,
+                            totalIncome = incomes.sumOf { it.amount },
+                            totalExpenses = expenses.sumOf { it.amount },
+                            totalSavings = totalSavings,
+                            daysLeft = daysLeft,
+                            forceRefresh = true
+                        )
+                    }
+                )
                 Spacer(modifier = Modifier.height(16.dp))
 
                 GoalActionsCard(
@@ -185,6 +234,73 @@ fun GoalDetailScreen(
                         currencySymbol = currencySymbol
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun GoalAiAnalysisCard(
+    analysis: String,
+    isLoading: Boolean,
+    usedFallback: Boolean,
+    onRefreshClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+            Text(
+                text = "Análisis inteligente de meta",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF0F2A44)
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            if (isLoading) {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        color = Color(0xFF2D6CDF),
+                        strokeWidth = 2.dp
+                    )
+                    Text(
+                        text = "Analizando tu meta con IA...",
+                        fontSize = 13.sp,
+                        color = Color(0xFF6B7280)
+                    )
+                }
+            } else {
+                Text(
+                    text = analysis,
+                    fontSize = 13.sp,
+                    lineHeight = 19.sp,
+                    color = Color(0xFF2B2B2B)
+                )
+            }
+            if (usedFallback) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Mostrando análisis local por indisponibilidad temporal de IA.",
+                    fontSize = 12.sp,
+                    color = Color(0xFF6B7280)
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(
+                onClick = onRefreshClick,
+                modifier = Modifier.fillMaxWidth().height(44.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D6CDF))
+            ) {
+                Text(
+                    text = "Actualizar análisis",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
