@@ -40,6 +40,8 @@ import com.lumixa.app.data.repository.LocalDataMigrationRepository
 import com.lumixa.app.presentation.viewmodel.AiAssistantViewModel
 import com.lumixa.app.presentation.viewmodel.DashboardAiInsightViewModel
 import com.lumixa.app.presentation.viewmodel.DashboardAiInsightViewModelFactory
+import com.lumixa.app.presentation.viewmodel.GoalAiAnalysisViewModel
+import com.lumixa.app.presentation.viewmodel.GoalAiAnalysisViewModelFactory
 import com.lumixa.app.presentation.ai.AiAssistantScreen
 import com.lumixa.app.data.repository.AiRepository
 import com.lumixa.app.BuildConfig
@@ -95,6 +97,9 @@ fun AppNavigation() {
     val aiAssistantViewModel = AiAssistantViewModel(aiRepository)
     val dashboardAiInsightViewModel: DashboardAiInsightViewModel = viewModel(
         factory = DashboardAiInsightViewModelFactory(aiRepository)
+    )
+    val goalAiAnalysisViewModel: GoalAiAnalysisViewModel = viewModel(
+        factory = GoalAiAnalysisViewModelFactory(aiRepository)
     )
 
     val migrationRepository = LocalDataMigrationRepository(
@@ -306,6 +311,9 @@ fun AppNavigation() {
             GoalDetailScreen(
                 goalViewModel = goalViewModel,
                 savingsViewModel = savingsViewModel,
+                incomeViewModel = incomeViewModel,
+                expenseViewModel = expenseViewModel,
+                goalAiAnalysisViewModel = goalAiAnalysisViewModel,
                 onBackClick = {
                     navController.popBackStack()
                 },

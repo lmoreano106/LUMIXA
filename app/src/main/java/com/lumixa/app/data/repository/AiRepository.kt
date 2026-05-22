@@ -103,4 +103,51 @@ class AiRepository(
             "Controla tus gastos diarios y reserva una parte fija para tus metas."
         }
     }
+
+    suspend fun generateGoalAnalysis(
+        goalName: String,
+        targetAmount: Double,
+        savedAmount: Double,
+        targetDate: String,
+        totalIncome: Double,
+        totalExpenses: Double,
+        totalSavings: Double
+    ): String {
+        return try {
+            val systemPrompt = """
+                Eres LUMIXA IA, asistente financiero para estudiantes.
+                Responde SIEMPRE en español.
+                Entrega exactamente 4 líneas (sin markdown):
+                1) Alcanzable: Sí/No + motivo breve.
+                2) Faltante: monto exacto.
+                3) Ahorro sugerido: diario y semanal.
+                4) Recomendación breve y segura.
+            """.trimIndent()
+
+            val userPrompt = """
+                Analiza esta meta:
+                - Nombre: $goalName
+                - Monto objetivo: $targetAmount
+                - Ahorro acumulado: $savedAmount
+                - Fecha objetivo: $targetDate
+                - Ingresos totales: $totalIncome
+                - Gastos totales: $totalExpenses
+                - Ahorros totales: $totalSavings
+            """.trimIndent()
+
+            val response = model.generateContent(
+                content {
+                    text(systemPrompt)
+                    text(userPrompt)
+                }
+            )
+
+            response.text?.trim().orEmpty().ifBlank {
+                "No fue posible generar el análisis inteligente en este momento."
+            }
+        } catch (e: Exception) {
+            Log.e("AiRepository", "Error generando análisis de meta", e)
+            "No fue posible generar el análisis inteligente en este momento."
+        }
+    }
 }
