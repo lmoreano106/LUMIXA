@@ -41,6 +41,8 @@ import com.lumixa.app.presentation.viewmodel.AiAssistantViewModel
 import com.lumixa.app.presentation.ai.AiAssistantScreen
 import com.lumixa.app.data.repository.AiRepository
 import com.lumixa.app.BuildConfig
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 @Composable
 fun AppNavigation() {
 
@@ -281,9 +283,11 @@ fun AppNavigation() {
             )
         }
         composable(Routes.Goal.route) {
+            val goals by goalViewModel.goals.collectAsState()
+
             CreateGoalScreen(
                 goalViewModel = goalViewModel,
-                existingGoal = goalViewModel.goals.value.firstOrNull(),
+                existingGoal = goals.firstOrNull(),
                 onSaveClick = {
                     navController.popBackStack()
                 },
@@ -308,9 +312,6 @@ fun AppNavigation() {
         composable(Routes.Statistics.route) {}
         composable(Routes.Admin.route) {
             AdminScreen(
-                onAiAssistantClick = {
-                    navController.navigate(Routes.AiAssistant.route)
-                },
                 onLogoutClick = {
                     authViewModel.logout()
 
@@ -328,10 +329,10 @@ fun AppNavigation() {
         }
 
         composable(Routes.AiAssistant.route) {
-            val incomes = incomeViewModel.incomes.value
-            val expenses = expenseViewModel.expenses.value
-            val goals = goalViewModel.goals.value
-            val savings = savingsViewModel.savings.value
+            val incomes by incomeViewModel.incomes.collectAsState()
+            val expenses by expenseViewModel.expenses.collectAsState()
+            val goals by goalViewModel.goals.collectAsState()
+            val savings by savingsViewModel.savings.collectAsState()
 
             AiAssistantScreen(
                 viewModel = aiAssistantViewModel,

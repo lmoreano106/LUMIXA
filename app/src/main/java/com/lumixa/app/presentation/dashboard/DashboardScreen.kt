@@ -50,6 +50,7 @@ fun DashboardScreen(
     onGoalClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
     onAiAssistantClick: () -> Unit = {}
+
 ) {
     val expenses by expenseViewModel.expenses.collectAsState()
     val incomes by incomeViewModel.incomes.collectAsState()
@@ -335,24 +336,7 @@ fun BalanceCard(
             }
 
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = onAiAssistantClick,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF0F2A44)
-                )
-            ) {
-                Text(
-                    text = "Asistente IA",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             Text(
                 text = "${currencySymbol}${currentBalance.toInt()}",
@@ -451,24 +435,7 @@ fun DailyControlCard(
             }
 
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = onAiAssistantClick,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF0F2A44)
-                )
-            ) {
-                Text(
-                    text = "Asistente IA",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             Text(
                 text = if (availableToday >= 0) {
