@@ -171,7 +171,7 @@ fun GoalProgressStatsCard(goals: List<GoalEntity>, totalSavings: Double, currenc
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().height(8.dp), color = Color(0xFF1FBF9F), trackColor = Color(0xFFE5E7EB))
+            LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().height(8.dp), color = Color(0xFF1FBF9F), trackColor = MaterialTheme.colorScheme.outlineVariant)
             Spacer(modifier = Modifier.height(10.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("Avance actual", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -185,7 +185,7 @@ fun GoalProgressStatsCard(goals: List<GoalEntity>, totalSavings: Double, currenc
 fun CircularGoalProgress(progress: Float) {
     Box(modifier = Modifier.size(96.dp), contentAlignment = Alignment.Center) {
         Canvas(modifier = Modifier.size(96.dp)) {
-            drawArc(Color(0xFFE5E7EB), -90f, 360f, false, style = Stroke(width = 10.dp.toPx(), cap = StrokeCap.Round))
+            drawArc(MaterialTheme.colorScheme.outlineVariant, -90f, 360f, false, style = Stroke(width = 10.dp.toPx(), cap = StrokeCap.Round))
             drawArc(Color(0xFF1FBF9F), -90f, 360f * progress, false, style = Stroke(width = 10.dp.toPx(), cap = StrokeCap.Round))
         }
         Text("${(progress * 100).toInt()}%", fontSize = 18.sp, fontWeight = FontWeight.Bold)
@@ -375,7 +375,7 @@ fun CategoryDistributionCard(expenses: List<ExpenseEntity>, currencySymbol: Stri
                     Text("${(progress * 100).roundToInt()}%", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Text(formatCurrency(amount, currencySymbol), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().height(7.dp), color = colors[index % colors.size], trackColor = Color(0xFFE5E7EB))
+                LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().height(7.dp), color = colors[index % colors.size], trackColor = MaterialTheme.colorScheme.outlineVariant)
                 Spacer(modifier = Modifier.height(10.dp))
             }
         }
@@ -390,7 +390,7 @@ fun SmartAnalysisCard(expenses: List<ExpenseEntity>, currencySymbol: String) {
     val topCategoryAmount = topCategory?.value?.sumOf { it.amount } ?: 0.0
     val topCategoryPercent = if (total > 0) ((topCategoryAmount / total) * 100).toInt() else 0
 
-    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF1FF)), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
         Column(modifier = Modifier.padding(18.dp)) {
             Text("ANÁLISIS INTELIGENTE", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.height(14.dp))
@@ -435,7 +435,7 @@ fun ExpensePredictionCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF4F6F8)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
@@ -444,7 +444,7 @@ fun ExpensePredictionCard(
                     text = "PREDICCIÓN DE GASTOS",
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF0F2A44)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = "Riesgo: ${state.riskLevel}",
@@ -464,15 +464,15 @@ fun ExpensePredictionCard(
                 if (state.isLoading) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         CircularProgressIndicator(color = Color(0xFF2D6CDF), strokeWidth = 3.dp, modifier = Modifier.size(20.dp))
-                        Text("Analizando tus hábitos de gasto...", color = Color(0xFF2B2B2B))
+                        Text("Analizando tus hábitos de gasto...", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 } else {
                     Column(horizontalAlignment = Alignment.Start) {
-                        Text(state.prediction, color = Color(0xFF2B2B2B), style = MaterialTheme.typography.bodyMedium)
+                        Text(state.prediction, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFE5E7EB)))
+                        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(MaterialTheme.colorScheme.outlineVariant))
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(state.recommendation, color = Color(0xFF0F2A44), style = MaterialTheme.typography.bodyMedium)
+                        Text(state.recommendation, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }

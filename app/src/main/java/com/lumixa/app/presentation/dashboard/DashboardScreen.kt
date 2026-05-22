@@ -148,14 +148,14 @@ fun DashboardScreen(
                     Text(
                         text = "Bienvenido de vuelta",
                         fontSize = 13.sp,
-                        color = Color(0xFF6B7280)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Text(
                         text = "Hola, $userName 👋",
                         fontSize = 25.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF0F2A44)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
@@ -174,7 +174,7 @@ fun DashboardScreen(
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF0F2A44)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -270,7 +270,7 @@ fun DashboardScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF0F2A44)
+                    containerColor = MaterialTheme.colorScheme.onSurface
                 )
             ) {
                 Text(
@@ -308,28 +308,28 @@ private fun DashboardAiInsightCard(
                 text = "💡 Consejo inteligente",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF0F2A44)
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(8.dp))
             if (isLoading) {
                 LinearProgressIndicator(
                     modifier = Modifier.fillMaxWidth(),
                     color = Color(0xFF2D6CDF),
-                    trackColor = Color(0xFFF4F6F8)
+                    trackColor = MaterialTheme.colorScheme.background
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
             Text(
                 text = insight,
                 fontSize = 13.sp,
-                color = Color(0xFF2B2B2B),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2
             )
             Spacer(modifier = Modifier.height(10.dp))
             Button(
                 onClick = onRefreshClick,
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F2A44)),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onSurface),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Text(
@@ -375,7 +375,7 @@ fun BalanceCard(
                         modifier = Modifier
                             .size(34.dp)
                             .background(
-                                color = Color(0xFFEAF1FF),
+                                color = MaterialTheme.colorScheme.surfaceVariant,
                                 shape = CircleShape
                             ),
                         contentAlignment = Alignment.Center
@@ -392,7 +392,7 @@ fun BalanceCard(
                         text = "SALDO ACTUAL",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF6B7280)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -422,7 +422,7 @@ fun BalanceCard(
                 text = "${currencySymbol}${currentBalance.toInt()}",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF0F2A44)
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -477,7 +477,7 @@ fun DailyControlCard(
                     Brush.linearGradient(
                         listOf(
                             Color(0xFF2D6CDF),
-                            Color(0xFF0F2A44)
+                            MaterialTheme.colorScheme.onSurface
                         )
                     )
                 )
@@ -637,7 +637,7 @@ fun SmartDailyMessage(
             fontSize = 13.sp,
             lineHeight = 18.sp,
             color = if (availableToday >= 0) {
-                Color(0xFF0F2A44)
+                MaterialTheme.colorScheme.onSurface
             } else {
                 Color(0xFFE11D48)
             },

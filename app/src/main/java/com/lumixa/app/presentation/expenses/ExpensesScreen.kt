@@ -115,7 +115,7 @@ fun ExpensesScreen(
             text = "Gastos",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF0F2A44)
+            color = MaterialTheme.colorScheme.onSurface
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -297,7 +297,7 @@ fun DayExpenseHeader(
             .padding(bottom = 10.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFEAF1FF)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
         Row(
@@ -309,7 +309,7 @@ fun DayExpenseHeader(
                     text = dayName,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF0F2A44)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(2.dp))
@@ -317,7 +317,7 @@ fun DayExpenseHeader(
                 Text(
                     text = date,
                     fontSize = 11.sp,
-                    color = Color(0xFF6B7280)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -362,7 +362,7 @@ fun DateExpensesList(
                         text = "Fecha seleccionada",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF6B7280)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Spacer(modifier = Modifier.height(6.dp))
@@ -371,7 +371,7 @@ fun DateExpensesList(
                         text = selectedDate,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF0F2A44)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -475,7 +475,7 @@ fun EmptyExpensesCard(
         ) {
             Text(
                 text = text,
-                color = Color(0xFF6B7280),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 14.sp
             )
         }
@@ -500,7 +500,7 @@ fun SummaryExpenseCard(
             Text(
                 text = title,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF0F2A44)
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -546,13 +546,13 @@ fun ExpenseItem(
                 Text(
                     text = category,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF0F2A44)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Text(
                     text = description,
                     fontSize = 12.sp,
-                    color = Color(0xFF6B7280)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Text(

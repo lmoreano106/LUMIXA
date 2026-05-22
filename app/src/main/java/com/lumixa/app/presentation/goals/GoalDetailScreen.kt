@@ -82,14 +82,14 @@ fun GoalDetailScreen(
 
                 fontSize = 13.sp,
 
-                color = Color(0xFF6B7280)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Text(
                 text = "Detalle de meta",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF0F2A44)
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(18.dp))
@@ -212,7 +212,7 @@ fun GoalDetailScreen(
                     text = "Historial de ahorro",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF0F2A44)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -223,7 +223,7 @@ fun GoalDetailScreen(
                     Text(
                         text = "Aún no tienes ahorro registrado.",
                         fontSize = 13.sp,
-                        color = Color(0xFF6B7280)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             } else {
@@ -257,7 +257,7 @@ fun GoalAiAnalysisCard(
                 text = "Análisis inteligente de meta",
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF0F2A44)
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(10.dp))
             if (isLoading) {
@@ -270,7 +270,7 @@ fun GoalAiAnalysisCard(
                     Text(
                         text = "Analizando tu meta con IA...",
                         fontSize = 13.sp,
-                        color = Color(0xFF6B7280)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             } else {
@@ -278,7 +278,7 @@ fun GoalAiAnalysisCard(
                     text = analysis,
                     fontSize = 13.sp,
                     lineHeight = 19.sp,
-                    color = Color(0xFF2B2B2B)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             if (usedFallback) {
@@ -286,7 +286,7 @@ fun GoalAiAnalysisCard(
                 Text(
                     text = "Mostrando análisis local por indisponibilidad temporal de IA.",
                     fontSize = 12.sp,
-                    color = Color(0xFF6B7280)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -319,7 +319,7 @@ fun EmptyGoalDetailCard() {
             text = "Aún no tienes una meta creada.",
             modifier = Modifier.padding(20.dp),
             fontSize = 14.sp,
-            color = Color(0xFF6B7280)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -350,7 +350,7 @@ fun GoalProgressDetailCard(
                 text = goalName,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF0F2A44)
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -370,7 +370,7 @@ fun GoalProgressDetailCard(
                     .fillMaxWidth()
                     .height(9.dp),
                 color = Color(0xFF1FBF9F),
-                trackColor = Color(0xFFE5E7EB)
+                trackColor = MaterialTheme.colorScheme.outlineVariant
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -407,14 +407,14 @@ fun DetailMoneyRow(
         Text(
             text = title,
             fontSize = 13.sp,
-            color = Color(0xFF6B7280)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Text(
             text = amount,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF0F2A44)
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -439,7 +439,7 @@ fun GoalTimeCard(
                 text = "Tiempo",
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF0F2A44)
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -473,7 +473,7 @@ fun SmartGoalRecommendationCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFEAF1FF)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
         Column(
@@ -483,7 +483,7 @@ fun SmartGoalRecommendationCard(
                 text = "Inteligencia financiera",
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF0F2A44)
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -507,7 +507,7 @@ fun SmartGoalRecommendationCard(
                 text = message,
                 fontSize = 13.sp,
                 lineHeight = 19.sp,
-                color = Color(0xFF0F2A44)
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -539,7 +539,7 @@ fun SavingHistoryItem(
                 text = date,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF0F2A44)
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Text(
@@ -570,7 +570,7 @@ fun GoalActionsCard(
                 text = "Acciones de meta",
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF0F2A44)
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(14.dp))

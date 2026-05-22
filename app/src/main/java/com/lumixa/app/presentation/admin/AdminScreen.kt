@@ -51,8 +51,8 @@ fun AdminScreen(
             uiState.isLoading -> LumixaLoadingCard("Cargando panel administrativo")
             !uiState.isAuthorized -> {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("⛔ Acceso no autorizado", fontSize = 22.sp, color = Color(0xFF0F2A44), fontWeight = FontWeight.Bold)
-                    Text(uiState.errorMessage ?: "Solo administradores pueden ver este panel.", color = Color(0xFF2B2B2B))
+                    Text("⛔ Acceso no autorizado", fontSize = 22.sp, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                    Text(uiState.errorMessage ?: "Solo administradores pueden ver este panel.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Button(onClick = onLogoutClick, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D6CDF))) {
                         Text("Volver", color = Color.White)
                     }
@@ -64,7 +64,7 @@ fun AdminScreen(
                     LumixaEmptyStateCard("Sin datos", "No hay datos administrativos disponibles todavía.")
                 } else {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        item { Text("🛡️ Panel Administrador", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F2A44)) }
+                        item { Text("🛡️ Panel Administrador", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface) }
                         item {
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
                                 MetricCard("Usuarios", data.metrics.totalUsers.toString(), Modifier.weight(1f))
@@ -77,7 +77,7 @@ fun AdminScreen(
                                 MetricCard("Registros", "${data.metrics.totalExpenseRecords + data.metrics.totalGoalRecords}", Modifier.weight(1f))
                             }
                         }
-                        item { Text("👥 Usuarios", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F2A44)) }
+                        item { Text("👥 Usuarios", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface) }
                         items(data.users) { user -> UserCard(user) }
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
@@ -98,8 +98,8 @@ fun AdminScreen(
 private fun MetricCard(title: String, value: String, modifier: Modifier = Modifier) {
     Card(modifier = modifier, shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
         Column(modifier = Modifier.padding(12.dp)) {
-            Text(title, color = Color(0xFF2B2B2B), fontSize = 12.sp)
-            Text(value, color = Color(0xFF0F2A44), fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(title, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+            Text(value, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, fontSize = 18.sp)
         }
     }
 }
@@ -108,9 +108,9 @@ private fun MetricCard(title: String, value: String, modifier: Modifier = Modifi
 private fun UserCard(user: AdminUserSummary) {
     Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
         Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("${user.displayName} (${user.role})", color = Color(0xFF0F2A44), fontWeight = FontWeight.Bold)
-            Text(user.email, color = Color(0xFF2B2B2B), fontSize = 13.sp)
-            Text("uid: ${user.uid}", color = Color(0xFF2B2B2B), fontSize = 11.sp)
+            Text("${user.displayName} (${user.role})", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+            Text(user.email, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+            Text("uid: ${user.uid}", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
         }
     }
 }

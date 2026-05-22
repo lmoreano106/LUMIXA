@@ -70,7 +70,7 @@ fun AiAssistantScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF4F6F8))
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -89,13 +89,13 @@ fun AiAssistantScreen(
                 text = "Asistente IA",
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF0F2A44)
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
 
         Text(
             text = "Tu guía financiera personal de LUMIXA.",
-            color = Color(0xFF2B2B2B)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Surface(
@@ -130,23 +130,23 @@ fun AiAssistantScreen(
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
                 text = "Preguntas sugeridas",
-                color = Color(0xFF0F2A44),
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.SemiBold
             )
             suggestedQuestions.forEach { suggestion ->
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFFEAF0FF), RoundedCornerShape(10.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(10.dp))
                         .clickable { question = suggestion }
                         .padding(horizontal = 12.dp, vertical = 10.dp)
                 ) {
-                    Text(text = suggestion, color = Color(0xFF0F2A44))
+                    Text(text = suggestion, color = MaterialTheme.colorScheme.onSurface)
                 }
             }
         }
 
-        HorizontalDivider(color = Color(0xFFE5E7EB))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         OutlinedTextField(
             value = question,
@@ -207,8 +207,8 @@ private fun LoadingBubble() {
             .background(Color(0xFFDFF7F2), RoundedCornerShape(14.dp))
             .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
-        CircularProgressIndicator(modifier = Modifier.height(18.dp), strokeWidth = 2.dp, color = Color(0xFF0F2A44))
+        CircularProgressIndicator(modifier = Modifier.height(18.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onSurface)
         Spacer(modifier = Modifier.width(10.dp))
-        Text(text = "LUMIXA IA está analizando...", color = Color(0xFF0F2A44))
+        Text(text = "LUMIXA IA está analizando...", color = MaterialTheme.colorScheme.onSurface)
     }
 }

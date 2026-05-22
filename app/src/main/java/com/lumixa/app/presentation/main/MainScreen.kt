@@ -2,6 +2,7 @@ package com.lumixa.app.presentation.main
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -43,7 +44,7 @@ fun MainScreen(
 
         bottomBar = {
 
-            NavigationBar {
+            NavigationBar(containerColor = MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface) {
 
                 NavigationBarItem(
                     selected = selectedTab == 0,

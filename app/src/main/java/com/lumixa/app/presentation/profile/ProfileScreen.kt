@@ -424,7 +424,7 @@ private fun CurrencySelectorItem(
             .fillMaxWidth()
             .clickable(enabled = enabled) { onClick() }
             .background(
-                color = if (selected) Color(0xFFEAF1FF) else Color(0xFFF4F6F8),
+                color = if (selected) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.background,
                 shape = RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 12.dp, vertical = 10.dp),
@@ -457,7 +457,7 @@ fun ProfileInfoCard(
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(1.dp, Color(0xFFE5E7EB))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Column(
             modifier = Modifier.padding(18.dp)
