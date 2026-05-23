@@ -46,9 +46,11 @@
                 runCatching {
                     val isAdmin = adminRepository.isCurrentUserAdmin(uid)
                     if (!isAdmin) {
+                        auth.signOut()
                         _uiState.value = AdminUiState(
                             isLoading = false,
-                            isAuthorized = false
+                            isAuthorized = false,
+                            errorMessage = "Acceso no autorizado para administrador."
                         )
                         return@runCatching
                     }
