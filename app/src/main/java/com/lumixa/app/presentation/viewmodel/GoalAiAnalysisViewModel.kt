@@ -22,7 +22,7 @@ private fun Throwable.isGeminiQuotaExceeded(): Boolean {
         messageText.contains("Quota exceeded", ignoreCase = true)
 }
 
-class GoalAiAnalysisUiState(
+data class GoalAiAnalysisUiState(
     val isLoading: Boolean = false,
     val analysis: String = "Aún no se ha generado análisis para esta meta.",
     val usedFallback: Boolean = false,

@@ -29,7 +29,7 @@ private fun Throwable.isGeminiQuotaExceeded(): Boolean {
         messageText.contains("Quota exceeded", ignoreCase = true)
 }
 
-class ExpensePredictionUiState(
+data class ExpensePredictionUiState(
     val isLoading: Boolean = false,
     val riskLevel: String = "moderado",
     val prediction: String = "Aún no se ha generado la predicción.",

@@ -5,23 +5,27 @@ import androidx.lifecycle.viewModelScope
 import com.lumixa.app.data.local.entity.GoalEntity
 import com.lumixa.app.data.repository.AiRepository
 import com.lumixa.app.data.repository.FinancialContext
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 
-private const val LUMIXA_IA_QUOTA_FALLBACK = "LUMIXA IA alcanzó el límite temporal de consultas. Intenta nuevamente en unos minutos."
+private const val LUMIXA_IA_QUOTA_FALLBACK =
+    "LUMIXA IA alcanzó el límite temporal de consultas. Intenta nuevamente en unos minutos."
+
 private const val LUMIXA_IA_TIMEOUT_MS = 15_000L
 
 private fun Throwable.isGeminiQuotaExceeded(): Boolean {
     val messageText = message.orEmpty()
     val classText = this::class.simpleName.orEmpty()
+
     return classText.contains("QuotaExceededException", ignoreCase = true) ||
-        messageText.contains("Quota exceeded", ignoreCase = true)
+            messageText.contains("Quota exceeded", ignoreCase = true)
 }
 
-class ChatAuthor {
+enum class ChatAuthor {
     USER,
     ASSISTANT
 }
@@ -52,11 +56,17 @@ class AiAssistantViewModel(
         goals: List<GoalEntity>
     ) {
         if (question.isBlank()) {
-            _uiState.value = _uiState.value.copy(error = "Escribe una pregunta para continuar.")
+            _uiState.value = _uiState.value.copy(
+                error = "Escribe una pregunta para continuar."
+            )
             return
         }
 
-        val userMessage = ChatMessage(author = ChatAuthor.USER, content = question.trim())
+        val userMessage = ChatMessage(
+            author = ChatAuthor.USER,
+            content = question.trim()
+        )
+
         _uiState.value = _uiState.value.copy(
             isLoading = true,
             error = null,
@@ -64,8 +74,8 @@ class AiAssistantViewModel(
         )
 
         viewModelScope.launch {
-            withTimeout(LUMIXA_IA_TIMEOUT_MS) {
-                runCatching {
+            try {
+                val answer = withTimeout(LUMIXA_IA_TIMEOUT_MS) {
                     val goalsSummary = if (goals.isEmpty()) {
                         "Sin metas registradas"
                     } else {
@@ -84,21 +94,37 @@ class AiAssistantViewModel(
                         )
                     )
                 }
-            }.onSuccess { answer ->
-                val assistantMessage = ChatMessage(author = ChatAuthor.ASSISTANT, content = answer)
+
+                val assistantMessage = ChatMessage(
+                    author = ChatAuthor.ASSISTANT,
+                    content = answer
+                )
+
                 _uiState.value = _uiState.value.copy(
                     messages = _uiState.value.messages + assistantMessage,
                     error = null
                 )
-            }.onFailure { throwable ->
-                val fallbackError = if (throwable.isGeminiQuotaExceeded()) {
-                    LUMIXA_IA_QUOTA_FALLBACK
-                } else {
-                    "No se pudo obtener respuesta de IA. Verifica tu conexión e intenta de nuevo."
+            } catch (throwable: Throwable) {
+                val fallbackError = when {
+                    throwable.isGeminiQuotaExceeded() -> LUMIXA_IA_QUOTA_FALLBACK
+                    throwable is TimeoutCancellationException -> "LUMIXA IA tardó demasiado en responder. Intenta nuevamente."
+                    else -> "No se pudo obtener respuesta de IA. Verifica tu conexión e intenta de nuevo."
                 }
-                _uiState.value = _uiState.value.copy(error = fallbackError)
+
+                val assistantMessage = ChatMessage(
+                    author = ChatAuthor.ASSISTANT,
+                    content = fallbackError
+                )
+
+                _uiState.value = _uiState.value.copy(
+                    messages = _uiState.value.messages + assistantMessage,
+                    error = null
+                )
+            } finally {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false
+                )
             }
-            _uiState.value = _uiState.value.copy(isLoading = false)
         }
     }
 }

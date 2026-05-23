@@ -22,7 +22,7 @@ private fun Throwable.isGeminiQuotaExceeded(): Boolean {
         messageText.contains("Quota exceeded", ignoreCase = true)
 }
 
-class DashboardAiInsightUiState(
+data class DashboardAiInsightUiState(
     val isLoading: Boolean = false,
     val insight: String = "Registra tus ingresos y gastos para recibir consejos personalizados.",
     val hasLoadedAtLeastOnce: Boolean = false
