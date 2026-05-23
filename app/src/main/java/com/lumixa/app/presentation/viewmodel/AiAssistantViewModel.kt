@@ -9,8 +9,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 
-enum class ChatAuthor {
+private const val LUMIXA_IA_QUOTA_FALLBACK = "LUMIXA IA alcanzó el límite temporal de consultas. Intenta nuevamente en unos minutos."
+private const val LUMIXA_IA_TIMEOUT_MS = 15_000L
+
+private fun Throwable.isGeminiQuotaExceeded(): Boolean {
+    val messageText = message.orEmpty()
+    val classText = this::class.simpleName.orEmpty()
+    return classText.contains("QuotaExceededException", ignoreCase = true) ||
+        messageText.contains("Quota exceeded", ignoreCase = true)
+}
+
+class ChatAuthor {
     USER,
     ASSISTANT
 }
@@ -53,37 +64,41 @@ class AiAssistantViewModel(
         )
 
         viewModelScope.launch {
-            runCatching {
-                val goalsSummary = if (goals.isEmpty()) {
-                    "Sin metas registradas"
-                } else {
-                    goals.joinToString(separator = "; ") {
-                        "${it.name}: ${it.savedAmount}/${it.targetAmount}, fecha ${it.targetDate}"
+            withTimeout(LUMIXA_IA_TIMEOUT_MS) {
+                runCatching {
+                    val goalsSummary = if (goals.isEmpty()) {
+                        "Sin metas registradas"
+                    } else {
+                        goals.joinToString(separator = "; ") {
+                            "${it.name}: ${it.savedAmount}/${it.targetAmount}, fecha ${it.targetDate}"
+                        }
                     }
-                }
 
-                repository.askFinancialAssistant(
-                    question = question,
-                    context = FinancialContext(
-                        totalIncome = totalIncome,
-                        totalExpenses = totalExpenses,
-                        totalSavings = totalSavings,
-                        goalsSummary = goalsSummary
+                    repository.askFinancialAssistant(
+                        question = question,
+                        context = FinancialContext(
+                            totalIncome = totalIncome,
+                            totalExpenses = totalExpenses,
+                            totalSavings = totalSavings,
+                            goalsSummary = goalsSummary
+                        )
                     )
-                )
+                }
             }.onSuccess { answer ->
                 val assistantMessage = ChatMessage(author = ChatAuthor.ASSISTANT, content = answer)
                 _uiState.value = _uiState.value.copy(
-                    isLoading = false,
                     messages = _uiState.value.messages + assistantMessage,
                     error = null
                 )
-            }.onFailure {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = "No se pudo obtener respuesta de IA. Verifica tu conexión e intenta de nuevo."
-                )
+            }.onFailure { throwable ->
+                val fallbackError = if (throwable.isGeminiQuotaExceeded()) {
+                    LUMIXA_IA_QUOTA_FALLBACK
+                } else {
+                    "No se pudo obtener respuesta de IA. Verifica tu conexión e intenta de nuevo."
+                }
+                _uiState.value = _uiState.value.copy(error = fallbackError)
             }
+            _uiState.value = _uiState.value.copy(isLoading = false)
         }
     }
 }

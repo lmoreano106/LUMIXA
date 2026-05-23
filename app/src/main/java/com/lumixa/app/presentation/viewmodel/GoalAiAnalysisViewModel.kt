@@ -8,10 +8,21 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import kotlin.math.ceil
 
 
-data class GoalAiAnalysisUiState(
+private const val LUMIXA_IA_QUOTA_FALLBACK = "LUMIXA IA alcanzó el límite temporal de consultas. Intenta nuevamente en unos minutos."
+private const val LUMIXA_IA_TIMEOUT_MS = 15_000L
+
+private fun Throwable.isGeminiQuotaExceeded(): Boolean {
+    val messageText = message.orEmpty()
+    val classText = this::class.simpleName.orEmpty()
+    return classText.contains("QuotaExceededException", ignoreCase = true) ||
+        messageText.contains("Quota exceeded", ignoreCase = true)
+}
+
+class GoalAiAnalysisUiState(
     val isLoading: Boolean = false,
     val analysis: String = "Aún no se ha generado análisis para esta meta.",
     val usedFallback: Boolean = false,
@@ -42,16 +53,6 @@ class GoalAiAnalysisViewModel(
         _uiState.value = _uiState.value.copy(isLoading = true)
 
         viewModelScope.launch {
-            val aiText = aiRepository.generateGoalAnalysis(
-                goalName = goalName,
-                targetAmount = targetAmount,
-                savedAmount = savedAmount,
-                targetDate = targetDate,
-                totalIncome = totalIncome,
-                totalExpenses = totalExpenses,
-                totalSavings = totalSavings
-            )
-
             val fallback = buildLocalFallback(
                 targetAmount = targetAmount,
                 savedAmount = savedAmount,
@@ -60,14 +61,34 @@ class GoalAiAnalysisViewModel(
                 daysLeft = daysLeft
             )
 
-            val failed = aiText.startsWith("No fue posible") || aiText.startsWith("No se pudo")
-
-            _uiState.value = _uiState.value.copy(
-                isLoading = false,
-                analysis = if (failed) fallback else aiText,
-                usedFallback = failed,
-                hasLoadedAtLeastOnce = true
-            )
+            runCatching {
+                withTimeout(LUMIXA_IA_TIMEOUT_MS) {
+                    aiRepository.generateGoalAnalysis(
+                        goalName = goalName,
+                        targetAmount = targetAmount,
+                        savedAmount = savedAmount,
+                        targetDate = targetDate,
+                        totalIncome = totalIncome,
+                        totalExpenses = totalExpenses,
+                        totalSavings = totalSavings
+                    )
+                }
+            }.onSuccess { aiText ->
+                val failed = aiText.startsWith("No fue posible") || aiText.startsWith("No se pudo")
+                _uiState.value = _uiState.value.copy(
+                    analysis = if (failed) fallback else aiText,
+                    usedFallback = failed,
+                    hasLoadedAtLeastOnce = true
+                )
+            }.onFailure { throwable ->
+                val message = if (throwable.isGeminiQuotaExceeded()) LUMIXA_IA_QUOTA_FALLBACK else fallback
+                _uiState.value = _uiState.value.copy(
+                    analysis = message,
+                    usedFallback = true,
+                    hasLoadedAtLeastOnce = true
+                )
+            }
+            _uiState.value = _uiState.value.copy(isLoading = false)
         }
     }
 
