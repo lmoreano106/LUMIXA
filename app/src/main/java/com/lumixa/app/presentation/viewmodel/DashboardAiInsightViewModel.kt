@@ -10,8 +10,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 
-data class DashboardAiInsightUiState(
+private const val LUMIXA_IA_QUOTA_FALLBACK = "LUMIXA IA alcanzó el límite temporal de consultas. Intenta nuevamente en unos minutos."
+private const val LUMIXA_IA_TIMEOUT_MS = 15_000L
+
+private fun Throwable.isGeminiQuotaExceeded(): Boolean {
+    val messageText = message.orEmpty()
+    val classText = this::class.simpleName.orEmpty()
+    return classText.contains("QuotaExceededException", ignoreCase = true) ||
+        messageText.contains("Quota exceeded", ignoreCase = true)
+}
+
+class DashboardAiInsightUiState(
     val isLoading: Boolean = false,
     val insight: String = "Registra tus ingresos y gastos para recibir consejos personalizados.",
     val hasLoadedAtLeastOnce: Boolean = false
@@ -46,28 +57,42 @@ class DashboardAiInsightViewModel(
         _uiState.value = _uiState.value.copy(isLoading = true)
 
         viewModelScope.launch {
-            val goalsSummary = if (goals.isEmpty()) {
-                "Sin metas registradas"
-            } else {
-                goals.joinToString(separator = "; ") {
-                    "${it.name}: ${it.savedAmount}/${it.targetAmount}, fecha ${it.targetDate}"
+            runCatching {
+                withTimeout(LUMIXA_IA_TIMEOUT_MS) {
+                    val goalsSummary = if (goals.isEmpty()) {
+                        "Sin metas registradas"
+                    } else {
+                        goals.joinToString(separator = "; ") {
+                            "${it.name}: ${it.savedAmount}/${it.targetAmount}, fecha ${it.targetDate}"
+                        }
+                    }
+
+                    aiRepository.generateDashboardInsight(
+                        context = FinancialContext(
+                            totalIncome = totalIncome,
+                            totalExpenses = totalExpenses,
+                            totalSavings = totalSavings,
+                            goalsSummary = goalsSummary
+                        )
+                    )
                 }
-            }
-
-            val insight = aiRepository.generateDashboardInsight(
-                context = FinancialContext(
-                    totalIncome = totalIncome,
-                    totalExpenses = totalExpenses,
-                    totalSavings = totalSavings,
-                    goalsSummary = goalsSummary
+            }.onSuccess { insight ->
+                _uiState.value = _uiState.value.copy(
+                    insight = insight,
+                    hasLoadedAtLeastOnce = true
                 )
-            )
-
-            _uiState.value = _uiState.value.copy(
-                isLoading = false,
-                insight = insight,
-                hasLoadedAtLeastOnce = true
-            )
+            }.onFailure { throwable ->
+                val message = if (throwable.isGeminiQuotaExceeded()) {
+                    LUMIXA_IA_QUOTA_FALLBACK
+                } else {
+                    "No se pudo obtener insight de IA en este momento."
+                }
+                _uiState.value = _uiState.value.copy(
+                    insight = message,
+                    hasLoadedAtLeastOnce = true
+                )
+            }
+            _uiState.value = _uiState.value.copy(isLoading = false)
         }
     }
 }

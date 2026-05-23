@@ -12,13 +12,24 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.util.Locale
 import kotlin.math.roundToInt
 
-data class ExpensePredictionUiState(
+private const val LUMIXA_IA_QUOTA_FALLBACK = "LUMIXA IA alcanzó el límite temporal de consultas. Intenta nuevamente en unos minutos."
+private const val LUMIXA_IA_TIMEOUT_MS = 15_000L
+
+private fun Throwable.isGeminiQuotaExceeded(): Boolean {
+    val messageText = message.orEmpty()
+    val classText = this::class.simpleName.orEmpty()
+    return classText.contains("QuotaExceededException", ignoreCase = true) ||
+        messageText.contains("Quota exceeded", ignoreCase = true)
+}
+
+class ExpensePredictionUiState(
     val isLoading: Boolean = false,
     val riskLevel: String = "moderado",
     val prediction: String = "Aún no se ha generado la predicción.",
@@ -58,30 +69,47 @@ class ExpensePredictionViewModel(
                 return@launch
             }
 
-            val aiResult = aiRepository.generateExpensePrediction(
-                expenses = expenses,
-                incomes = incomes,
-                savings = savings,
-                goals = goals
-            )
-
-            val failed = aiResult == null
-            _uiState.value = if (failed) {
-                fallback.copy(
-                    isLoading = false,
-                    usedFallback = true,
-                    hasLoadedAtLeastOnce = true
-                )
-            } else {
-                ExpensePredictionUiState(
-                    isLoading = false,
-                    riskLevel = aiResult.riskLevel,
-                    prediction = aiResult.prediction,
-                    recommendation = aiResult.recommendation,
-                    usedFallback = false,
-                    hasLoadedAtLeastOnce = true
-                )
+            runCatching {
+                withTimeout(LUMIXA_IA_TIMEOUT_MS) {
+                    aiRepository.generateExpensePrediction(
+                        expenses = expenses,
+                        incomes = incomes,
+                        savings = savings,
+                        goals = goals
+                    )
+                }
+            }.onSuccess { aiResult ->
+                val failed = aiResult == null
+                _uiState.value = if (failed) {
+                    fallback.copy(
+                        usedFallback = true,
+                        hasLoadedAtLeastOnce = true
+                    )
+                } else {
+                    ExpensePredictionUiState(
+                        riskLevel = aiResult.riskLevel,
+                        prediction = aiResult.prediction,
+                        recommendation = aiResult.recommendation,
+                        usedFallback = false,
+                        hasLoadedAtLeastOnce = true
+                    )
+                }
+            }.onFailure { throwable ->
+                _uiState.value = if (throwable.isGeminiQuotaExceeded()) {
+                    fallback.copy(
+                        prediction = LUMIXA_IA_QUOTA_FALLBACK,
+                        recommendation = "Intenta nuevamente en unos minutos.",
+                        usedFallback = true,
+                        hasLoadedAtLeastOnce = true
+                    )
+                } else {
+                    fallback.copy(
+                        usedFallback = true,
+                        hasLoadedAtLeastOnce = true
+                    )
+                }
             }
+            _uiState.value = _uiState.value.copy(isLoading = false)
         }
     }
 
