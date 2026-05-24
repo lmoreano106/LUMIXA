@@ -13,6 +13,7 @@ sealed class Routes(val route: String) {
     data object Admin : Routes("admin")
     data object AddExpense : Routes("add_expense")
     data object AddIncome : Routes("add_income")
+    data object IncomeHistory : Routes("income_history")
     data object CreateGoal : Routes("create_goal")
     object GoalDetail : Routes("goal_detail")
     object EditGoal : Routes("edit_goal")

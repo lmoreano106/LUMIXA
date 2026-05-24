@@ -50,6 +50,7 @@ fun DashboardScreen(
     onAddExpenseClick: () -> Unit = {},
     onAddIncomeClick: () -> Unit = {},
     onGoalClick: () -> Unit = {},
+    onIncomeHistoryClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
     onAiAssistantClick: () -> Unit = {}
 
@@ -262,6 +263,16 @@ fun DashboardScreen(
                 }
             }
 
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "Ver ingresos",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF2D6CDF),
+                modifier = Modifier.clickable { onIncomeHistoryClick() }
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
