@@ -14,6 +14,7 @@ import com.lumixa.app.presentation.admin.AdminScreen
 import com.lumixa.app.presentation.auth.login.LoginScreen
 import com.lumixa.app.presentation.auth.register.RegisterScreen
 import com.lumixa.app.presentation.dashboard.AddIncomeScreen
+import com.lumixa.app.presentation.dashboard.IncomeHistoryScreen
 import com.lumixa.app.presentation.expenses.AddExpenseScreen
 import com.lumixa.app.presentation.goals.CreateGoalScreen
 import com.lumixa.app.presentation.main.MainScreen
@@ -49,6 +50,7 @@ import com.lumixa.app.data.repository.AiRepository
 import com.lumixa.app.BuildConfig
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.lumixa.app.data.preferences.CurrencyPreferences
 import com.lumixa.app.presentation.viewmodel.AiAssistantViewModelFactory
 @Composable
 fun AppNavigation() {
@@ -229,6 +231,9 @@ fun AppNavigation() {
                 onAddIncomeClick = {
                     navController.navigate(Routes.AddIncome.route)
                 },
+                onIncomeHistoryClick = {
+                    navController.navigate(Routes.IncomeHistory.route)
+                },
 
                 onGoalClick = {
                     if (goalViewModel.goals.value.isEmpty()) {
@@ -283,6 +288,16 @@ fun AppNavigation() {
                 onSaveClick = {
                     navController.popBackStack()
                 },
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Routes.IncomeHistory.route) {
+            IncomeHistoryScreen(
+                incomeViewModel = incomeViewModel,
+                currencySymbol = CurrencyPreferences(context).getCurrencySymbol(),
                 onBackClick = {
                     navController.popBackStack()
                 }
