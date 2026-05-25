@@ -136,16 +136,19 @@ fun AppNavigation() {
             LoginScreen(
                 authViewModel = authViewModel,
                 onUserLoginClick = {
-                    incomeViewModel.refreshIncomes()
-                    expenseViewModel.refreshExpenses()
-                    goalViewModel.refreshGoals()
-                    savingsViewModel.refreshSavings()
-
-                    navController.navigate(Routes.Dashboard.route) {
-                        popUpTo(Routes.Onboarding.route) {
-                            inclusive = true
+                    incomeViewModel.syncIncomesFromFirestore {
+                        expenseViewModel.syncExpensesFromFirestore {
+                            goalViewModel.syncGoalsFromFirestore {
+                                savingsViewModel.syncSavingsFromFirestore {
+                                    navController.navigate(Routes.Dashboard.route) {
+                                        popUpTo(Routes.Onboarding.route) {
+                                            inclusive = true
+                                        }
+                                        launchSingleTop = true
+                                    }
+                                }
+                            }
                         }
-                        launchSingleTop = true
                     }
                 },
                 onAdminLoginClick = {

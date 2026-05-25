@@ -91,6 +91,14 @@ class IncomeViewModel(
         }
     }
 
+    fun syncIncomesFromFirestore(onFinished: () -> Unit = {}) {
+        viewModelScope.launch {
+            repository.syncIncomesFromFirestore()
+            refreshIncomes()
+            onFinished()
+        }
+    }
+
     fun clearData() {
         incomesJob?.cancel()
         _incomes.value = emptyList()

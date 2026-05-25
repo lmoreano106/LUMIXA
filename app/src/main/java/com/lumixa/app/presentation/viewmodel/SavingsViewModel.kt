@@ -99,6 +99,14 @@ class SavingsViewModel(
         }
     }
 
+    fun syncSavingsFromFirestore(onFinished: () -> Unit = {}) {
+        viewModelScope.launch {
+            repository.syncSavingsFromFirestore()
+            refreshSavings()
+            onFinished()
+        }
+    }
+
     fun clearData() {
         savingsJob?.cancel()
         _savings.value = emptyList()

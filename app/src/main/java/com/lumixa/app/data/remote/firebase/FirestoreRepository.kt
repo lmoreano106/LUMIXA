@@ -101,4 +101,56 @@ class FirestoreRepository(
             )
             .await()
     }
+
+    suspend fun fetchIncomes(uid: String): List<IncomeEntity> {
+        if (uid.isBlank()) return emptyList()
+
+        return firestore
+            .collection("users")
+            .document(uid)
+            .collection("incomes")
+            .get()
+            .await()
+            .documents
+            .mapNotNull { it.toObject(IncomeEntity::class.java) }
+    }
+
+    suspend fun fetchExpenses(uid: String): List<ExpenseEntity> {
+        if (uid.isBlank()) return emptyList()
+
+        return firestore
+            .collection("users")
+            .document(uid)
+            .collection("expenses")
+            .get()
+            .await()
+            .documents
+            .mapNotNull { it.toObject(ExpenseEntity::class.java) }
+    }
+
+    suspend fun fetchGoals(uid: String): List<GoalEntity> {
+        if (uid.isBlank()) return emptyList()
+
+        return firestore
+            .collection("users")
+            .document(uid)
+            .collection("goals")
+            .get()
+            .await()
+            .documents
+            .mapNotNull { it.toObject(GoalEntity::class.java) }
+    }
+
+    suspend fun fetchSavings(uid: String): List<SavingsEntity> {
+        if (uid.isBlank()) return emptyList()
+
+        return firestore
+            .collection("users")
+            .document(uid)
+            .collection("savings")
+            .get()
+            .await()
+            .documents
+            .mapNotNull { it.toObject(SavingsEntity::class.java) }
+    }
 }
