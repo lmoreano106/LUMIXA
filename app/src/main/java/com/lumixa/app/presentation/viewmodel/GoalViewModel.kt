@@ -103,6 +103,14 @@ class GoalViewModel(
         }
     }
 
+    fun syncGoalsFromFirestore(onFinished: () -> Unit = {}) {
+        viewModelScope.launch {
+            repository.syncGoalsFromFirestore()
+            refreshGoals()
+            onFinished()
+        }
+    }
+
     fun clearData() {
 
         goalsJob?.cancel()

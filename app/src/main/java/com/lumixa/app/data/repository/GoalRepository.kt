@@ -2,13 +2,16 @@ package com.lumixa.app.data.repository
 
 import com.lumixa.app.data.local.dao.GoalDao
 import com.lumixa.app.data.local.entity.GoalEntity
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
+import com.lumixa.app.data.remote.firebase.FirestoreRepository as RemoteFirestoreRepository
 import kotlinx.coroutines.flow.Flow
 
 class GoalRepository(
     private val goalDao: GoalDao,
     private val firestoreRepository: FirestoreRepository,
-    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(),
+    private val remoteFirestoreRepository: RemoteFirestoreRepository = RemoteFirestoreRepository()
 ) {
 
     suspend fun insertGoal(
@@ -65,5 +68,16 @@ class GoalRepository(
                 goalId = goalId
             )
         }
+    }
+
+    suspend fun syncGoalsFromFirestore() {
+        val uid = firebaseAuth.currentUser?.uid ?: ""
+        Log.d("SYNC", "UID actual: $uid")
+        if (uid.isBlank()) return
+
+        val items = remoteFirestoreRepository.fetchGoals(uid)
+        Log.d("SYNC", "Metas descargadas: ${items.size}")
+
+        items.forEach { goalDao.insertGoal(it.copy(userId = uid)) }
     }
 }

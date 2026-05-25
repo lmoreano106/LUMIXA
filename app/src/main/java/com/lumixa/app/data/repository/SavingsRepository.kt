@@ -2,11 +2,16 @@ package com.lumixa.app.data.repository
 
 import com.lumixa.app.data.local.dao.SavingsDao
 import com.lumixa.app.data.local.entity.SavingsEntity
+import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
+import com.lumixa.app.data.remote.firebase.FirestoreRepository as RemoteFirestoreRepository
 import kotlinx.coroutines.flow.Flow
 
 class SavingsRepository(
     private val savingsDao: SavingsDao,
-    private val firestoreRepository: FirestoreRepository
+    private val firestoreRepository: FirestoreRepository,
+    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(),
+    private val remoteFirestoreRepository: RemoteFirestoreRepository = RemoteFirestoreRepository()
 ) {
 
     suspend fun insertSaving(
@@ -89,5 +94,16 @@ class SavingsRepository(
             userId = userId,
             savingId = savingId
         )
+    }
+
+    suspend fun syncSavingsFromFirestore() {
+        val uid = firebaseAuth.currentUser?.uid ?: ""
+        Log.d("SYNC", "UID actual: $uid")
+        if (uid.isBlank()) return
+
+        val items = remoteFirestoreRepository.fetchSavings(uid)
+        Log.d("SYNC", "Ahorros descargados: ${items.size}")
+
+        items.forEach { savingsDao.insertSaving(it.copy(userId = uid)) }
     }
 }

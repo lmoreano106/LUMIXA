@@ -89,6 +89,14 @@ class ExpenseViewModel(
             refreshExpenses()
         }
     }
+    fun syncExpensesFromFirestore(onFinished: () -> Unit = {}) {
+        viewModelScope.launch {
+            repository.syncExpensesFromFirestore()
+            refreshExpenses()
+            onFinished()
+        }
+    }
+
     fun clearData() {
         expensesJob?.cancel()
         _expenses.value = emptyList()
