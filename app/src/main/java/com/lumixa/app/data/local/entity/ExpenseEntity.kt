@@ -9,17 +9,17 @@ data class ExpenseEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
 
-    val userId: String,
+    val amount: Double = 0.0,
 
-    val category: String,
+    val category: String = "",
 
-    val description: String,
+    val description: String = "",
 
-    val amount: Double,
+    val date: String = "",
 
-    val date: String,
+    val time: String = "",
 
-    val time: String,
+    val dayOfWeek: Int = 0,
 
-    val dayOfWeek: Int
+    val userId: String = ""
 )

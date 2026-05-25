@@ -9,15 +9,15 @@ data class IncomeEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
 
-    val userId: String,
+    val amount: Double = 0.0,
 
-    val amount: Double,
+    val type: String = "",
 
-    val type: String,
+    val description: String = "",
 
-    val description: String,
+    val date: String = "",
 
-    val date: String,
+    val time: String = "",
 
-    val time: String
+    val userId: String = ""
 )

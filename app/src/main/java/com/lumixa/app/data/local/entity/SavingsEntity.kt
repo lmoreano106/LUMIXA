@@ -5,13 +5,12 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "savings")
 data class SavingsEntity(
-
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
 
-    val userId: String,
+    val amount: Double = 0.0,
 
-    val amount: Double,
+    val date: String = "",
 
-    val date: String
+    val userId: String = ""
 )
