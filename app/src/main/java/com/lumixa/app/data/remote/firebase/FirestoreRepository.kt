@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.lumixa.app.data.local.entity.ExpenseEntity
 import com.lumixa.app.data.local.entity.GoalEntity
+import com.lumixa.app.data.local.entity.GoalMovementEntity
 import com.lumixa.app.data.local.entity.IncomeEntity
 import com.lumixa.app.data.local.entity.SavingsEntity
 import kotlinx.coroutines.tasks.await
@@ -49,6 +50,17 @@ class FirestoreRepository(
             .collection("goals")
             .document(goal.id.toString())
             .set(goal)
+            .await()
+    }
+
+    suspend fun saveGoalMovement(movement: GoalMovementEntity) {
+        val uid = userId()
+        if (uid.isBlank()) return
+
+        userDocument()
+            .collection("goal_movements")
+            .document(movement.id.toString())
+            .set(movement)
             .await()
     }
 
@@ -139,6 +151,19 @@ class FirestoreRepository(
             .await()
             .documents
             .mapNotNull { it.toObject(GoalEntity::class.java) }
+    }
+
+    suspend fun fetchGoalMovements(uid: String): List<GoalMovementEntity> {
+        if (uid.isBlank()) return emptyList()
+
+        return firestore
+            .collection("users")
+            .document(uid)
+            .collection("goal_movements")
+            .get()
+            .await()
+            .documents
+            .mapNotNull { it.toObject(GoalMovementEntity::class.java) }
     }
 
     suspend fun fetchSavings(uid: String): List<SavingsEntity> {

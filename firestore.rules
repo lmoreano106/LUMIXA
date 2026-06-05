@@ -38,6 +38,10 @@ service cloud.firestore {
       allow read, write: if isOwner(uid) || isAdmin();
     }
 
+    match /users/{uid}/goal_movements/{id} {
+      allow read, write: if isOwner(uid) || isAdmin();
+    }
+
     match /users/{uid}/savings/{id} {
       allow read, write: if isOwner(uid) || isAdmin();
     }

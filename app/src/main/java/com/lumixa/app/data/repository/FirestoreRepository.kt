@@ -199,6 +199,43 @@ class FirestoreRepository(
         }
     }
 
+    suspend fun upsertGoalMovement(
+        userId: String,
+        movementId: Int,
+        goalId: Int,
+        amount: Double,
+        description: String,
+        type: String,
+        date: String,
+        time: String
+    ) {
+        val movementData = mapOf(
+            "id" to movementId,
+            "goalId" to goalId,
+            "userId" to userId,
+            "amount" to amount,
+            "description" to description,
+            "type" to type,
+            "date" to date,
+            "time" to time
+        )
+
+        suspendCoroutine<Unit> { continuation ->
+            firestore
+                .collection("users")
+                .document(userId)
+                .collection("goal_movements")
+                .document(movementId.toString())
+                .set(movementData)
+                .addOnSuccessListener {
+                    continuation.resume(Unit)
+                }
+                .addOnFailureListener { exception ->
+                    continuation.resumeWithException(exception)
+                }
+        }
+    }
+
     suspend fun deleteGoal(
         userId: String,
         goalId: Int

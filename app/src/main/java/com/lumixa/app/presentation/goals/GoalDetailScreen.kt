@@ -5,17 +5,24 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lumixa.app.presentation.viewmodel.GoalViewModel
@@ -25,7 +32,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.ceil
-import kotlin.math.max
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.LaunchedEffect
@@ -46,12 +52,18 @@ fun GoalDetailScreen(
 )  {
     val goals by goalViewModel.goals.collectAsState()
     val savings by savingsViewModel.savings.collectAsState()
+    val goalMovements by goalViewModel.goalMovements.collectAsState()
+    val withdrawalError by goalViewModel.goalWithdrawalError.collectAsState()
     val incomes by incomeViewModel.incomes.collectAsState()
     val expenses by expenseViewModel.expenses.collectAsState()
     val aiUiState by goalAiAnalysisViewModel.uiState.collectAsState()
 
     val goal = goals.firstOrNull()
-    val totalSavings = savings.sumOf { it.amount }
+    val goalMovementsForGoal = goal?.let { selectedGoal ->
+        goalMovements.filter { it.goalId == selectedGoal.id }
+    } ?: emptyList()
+    val totalGoalWithdrawals = goalMovementsForGoal.sumOf { it.amount }
+    val totalSavings = (savings.sumOf { it.amount } - totalGoalWithdrawals).coerceAtLeast(0.0)
     val context = LocalContext.current
 
     val currencyPreferences = remember {
@@ -59,6 +71,31 @@ fun GoalDetailScreen(
     }
 
     val currencySymbol = currencyPreferences.getCurrencySymbol()
+    var showUseGoalMoneyDialog by remember { mutableStateOf(false) }
+
+    goal?.let { currentGoal ->
+        if (showUseGoalMoneyDialog) {
+            UseGoalMoneyDialog(
+                availableAmount = totalSavings,
+                currencySymbol = currencySymbol,
+                errorMessage = withdrawalError,
+                onDismiss = {
+                    showUseGoalMoneyDialog = false
+                    goalViewModel.clearGoalWithdrawalError()
+                },
+                onConfirm = { amount, description ->
+                    goalViewModel.useGoalMoney(
+                        goal = currentGoal,
+                        availableAmount = totalSavings,
+                        amount = amount,
+                        description = description,
+                        onSuccess = { showUseGoalMoneyDialog = false }
+                    )
+                }
+            )
+        }
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -199,6 +236,11 @@ fun GoalDetailScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 GoalActionsCard(
+                    showUseGoalMoney = progress >= 1f && totalSavings > 0.0,
+                    onUseGoalMoneyClick = {
+                        goalViewModel.clearGoalWithdrawalError()
+                        showUseGoalMoneyDialog = true
+                    },
                     onEditClick = onEditClick,
                     onDeleteClick = {
                         goalViewModel.deleteGoal(goal.id)
@@ -209,7 +251,7 @@ fun GoalDetailScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Historial de ahorro",
+                    text = "Historial de meta",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF0F2A44)
@@ -218,21 +260,34 @@ fun GoalDetailScreen(
                 Spacer(modifier = Modifier.height(10.dp))
             }
 
-            if (savings.isEmpty()) {
+            val movementItems = buildList {
+                addAll(savings.map { GoalHistoryItem.Saving(it.id, it.date, it.amount) })
+                addAll(goalMovementsForGoal.map { GoalHistoryItem.Withdrawal(it.id, it.date, it.amount, it.description) })
+            }.sortedByDescending { it.id }
+
+            if (movementItems.isEmpty()) {
                 item {
                     Text(
-                        text = "Aún no tienes ahorro registrado.",
+                        text = "Aún no tienes movimientos de meta registrados.",
                         fontSize = 13.sp,
                         color = Color(0xFF6B7280)
                     )
                 }
             } else {
-                items(savings.sortedByDescending { it.id }) { saving ->
-                    SavingHistoryItem(
-                        date = saving.date,
-                        amount = saving.amount,
-                        currencySymbol = currencySymbol
-                    )
+                items(movementItems) { movement ->
+                    when (movement) {
+                        is GoalHistoryItem.Saving -> SavingHistoryItem(
+                            date = movement.date,
+                            amount = movement.amount,
+                            currencySymbol = currencySymbol
+                        )
+                        is GoalHistoryItem.Withdrawal -> GoalWithdrawalHistoryItem(
+                            date = movement.date,
+                            amount = movement.amount,
+                            description = movement.description,
+                            currencySymbol = currencySymbol
+                        )
+                    }
                 }
             }
         }
@@ -513,6 +568,119 @@ fun SmartGoalRecommendationCard(
     }
 }
 
+
+private sealed class GoalHistoryItem(open val id: Int) {
+    data class Saving(
+        override val id: Int,
+        val date: String,
+        val amount: Double
+    ) : GoalHistoryItem(id)
+
+    data class Withdrawal(
+        override val id: Int,
+        val date: String,
+        val amount: Double,
+        val description: String
+    ) : GoalHistoryItem(id)
+}
+
+@Composable
+fun UseGoalMoneyDialog(
+    availableAmount: Double,
+    currencySymbol: String,
+    errorMessage: String?,
+    onDismiss: () -> Unit,
+    onConfirm: (Double, String) -> Unit
+) {
+    var amountText by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+    var localError by remember { mutableStateOf<String?>(null) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Usar dinero de la meta",
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF0F2A44)
+            )
+        },
+        text = {
+            Column {
+                Text(
+                    text = "Disponible: ${currencySymbol}${availableAmount.toInt()}. Este movimiento se registrará como uso de meta y no como gasto normal.",
+                    fontSize = 13.sp,
+                    lineHeight = 19.sp,
+                    color = Color(0xFF6B7280)
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                OutlinedTextField(
+                    value = amountText,
+                    onValueChange = { value ->
+                        amountText = value.filter { it.isDigit() || it == '.' }
+                        localError = null
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Monto a usar") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    shape = RoundedCornerShape(14.dp)
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Descripción") },
+                    placeholder = { Text("Ejemplo: Compra de laptop") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(14.dp)
+                )
+
+                val visibleError = localError ?: errorMessage
+                if (!visibleError.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = visibleError,
+                        fontSize = 12.sp,
+                        color = Color(0xFFE11D48)
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val amount = amountText.toDoubleOrNull() ?: 0.0
+                    when {
+                        amount <= 0.0 -> localError = "Ingresa un monto mayor a 0."
+                        amount > availableAmount -> localError = "El monto supera el ahorro disponible de la meta."
+                        else -> onConfirm(amount, description)
+                    }
+                },
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1FBF9F))
+            ) {
+                Text(
+                    text = "Registrar uso",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar", color = Color(0xFF6B7280))
+            }
+        },
+        containerColor = Color.White
+    )
+}
+
 @Composable
 fun SavingHistoryItem(
     date: String,
@@ -551,8 +719,58 @@ fun SavingHistoryItem(
         }
     }
 }
+
+@Composable
+fun GoalWithdrawalHistoryItem(
+    date: String,
+    amount: Double,
+    description: String,
+    currencySymbol: String
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 10.dp),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFFFF7ED)
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = date,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F2A44)
+                )
+                Text(
+                    text = description.ifBlank { "Uso de dinero de la meta" },
+                    fontSize = 12.sp,
+                    color = Color(0xFF6B7280)
+                )
+            }
+
+            Text(
+                text = "-${currencySymbol}${amount.toInt()}",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFF59E0B)
+            )
+        }
+    }
+}
+
 @Composable
 fun GoalActionsCard(
+    showUseGoalMoney: Boolean,
+    onUseGoalMoneyClick: () -> Unit,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
@@ -574,6 +792,28 @@ fun GoalActionsCard(
             )
 
             Spacer(modifier = Modifier.height(14.dp))
+
+            if (showUseGoalMoney) {
+                Button(
+                    onClick = onUseGoalMoneyClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF1FBF9F)
+                    )
+                ) {
+                    Text(
+                        text = "Usar dinero de la meta",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+            }
 
             Button(
                 onClick = onEditClick,
