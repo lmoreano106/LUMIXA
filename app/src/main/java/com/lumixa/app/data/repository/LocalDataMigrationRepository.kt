@@ -3,6 +3,7 @@ package com.lumixa.app.data.repository
 import com.google.firebase.auth.FirebaseAuth
 import com.lumixa.app.data.local.dao.ExpenseDao
 import com.lumixa.app.data.local.dao.GoalDao
+import com.lumixa.app.data.local.dao.GoalMovementDao
 import com.lumixa.app.data.local.dao.IncomeDao
 import com.lumixa.app.data.local.dao.SavingsDao
 import kotlinx.coroutines.flow.first
@@ -12,6 +13,7 @@ class LocalDataMigrationRepository(
     private val expenseDao: ExpenseDao,
     private val incomeDao: IncomeDao,
     private val goalDao: GoalDao,
+    private val goalMovementDao: GoalMovementDao,
     private val savingsDao: SavingsDao,
     private val firestoreRepository: FirestoreRepository,
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -58,6 +60,22 @@ class LocalDataMigrationRepository(
                     targetAmount = goal.targetAmount,
                     savedAmount = goal.savedAmount,
                     targetDate = goal.targetDate
+                )
+            }
+        }
+
+
+        runCatching {
+            goalMovementDao.getAllMovements(userId).first().forEach { movement ->
+                firestoreRepository.upsertGoalMovement(
+                    userId = userId,
+                    movementId = movement.id,
+                    goalId = movement.goalId,
+                    amount = movement.amount,
+                    description = movement.description,
+                    type = movement.type,
+                    date = movement.date,
+                    time = movement.time
                 )
             }
         }

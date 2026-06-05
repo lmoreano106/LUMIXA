@@ -83,6 +83,7 @@ fun AppNavigation() {
     )
     val goalRepository = GoalRepository(
         goalDao = database.goalDao(),
+        goalMovementDao = database.goalMovementDao(),
         firestoreRepository = firestoreRepository
     )
 
@@ -116,6 +117,7 @@ fun AppNavigation() {
         expenseDao = database.expenseDao(),
         incomeDao = database.incomeDao(),
         goalDao = database.goalDao(),
+        goalMovementDao = database.goalMovementDao(),
         savingsDao = database.savingsDao(),
         firestoreRepository = firestoreRepository
     )
@@ -373,12 +375,13 @@ fun AppNavigation() {
             val expenses by expenseViewModel.expenses.collectAsState()
             val goals by goalViewModel.goals.collectAsState()
             val savings by savingsViewModel.savings.collectAsState()
+            val goalMovements by goalViewModel.goalMovements.collectAsState()
 
             AiAssistantScreen(
                 viewModel = aiAssistantViewModel,
                 totalIncome = incomes.sumOf { it.amount },
                 totalExpenses = expenses.sumOf { it.amount },
-                totalSavings = savings.sumOf { it.amount },
+                totalSavings = (savings.sumOf { it.amount } - goalMovements.sumOf { it.amount }).coerceAtLeast(0.0),
                 goals = goals,
                 onBackClick = { navController.popBackStack() }
             )

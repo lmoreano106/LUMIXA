@@ -63,6 +63,7 @@ fun StatisticsScreen(
     val expenses by expenseViewModel.expenses.collectAsState()
     val goals by goalViewModel.goals.collectAsState()
     val savings by savingsViewModel.savings.collectAsState()
+    val goalMovements by goalViewModel.goalMovements.collectAsState()
     val incomes by incomeViewModel.incomes.collectAsState()
     val predictionState by expensePredictionViewModel.uiState.collectAsState()
 
@@ -70,7 +71,8 @@ fun StatisticsScreen(
     val currencyPrefs = remember(context) { CurrencyPreferences(context) }
     val currencySymbol = remember { currencyPrefs.getCurrencySymbol() }
 
-    val totalSavings = savings.sumOf { it.amount }
+    val totalGoalWithdrawals = goalMovements.sumOf { it.amount }
+    val totalSavings = (savings.sumOf { it.amount } - totalGoalWithdrawals).coerceAtLeast(0.0)
 
     LazyColumn(
         modifier = Modifier

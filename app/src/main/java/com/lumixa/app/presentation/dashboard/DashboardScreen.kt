@@ -59,6 +59,7 @@ fun DashboardScreen(
     val incomes by incomeViewModel.incomes.collectAsState()
     val goals by goalViewModel.goals.collectAsState()
     val savings by savingsViewModel.savings.collectAsState()
+    val goalMovements by goalViewModel.goalMovements.collectAsState()
     val aiInsightUiState by dashboardAiInsightViewModel.uiState.collectAsState()
 
     val context = LocalContext.current
@@ -82,7 +83,9 @@ fun DashboardScreen(
 
     val totalExpenses = expenses.sumOf { it.amount }
 
-    val totalSavings = savings.sumOf { it.amount }
+    val totalGoalWithdrawals = goalMovements.sumOf { it.amount }
+
+    val totalSavings = (savings.sumOf { it.amount } - totalGoalWithdrawals).coerceAtLeast(0.0)
 
     val monthlyIncome =
         FinancialCalculator.calculateMonthlyIncome(totalIncome)
